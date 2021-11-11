@@ -28,7 +28,6 @@ exports.postRegister = async function (req, res, next) {
 
 	    let userExists = await userModel.exists({email: email});
 
-	    console.log(userExists);
 	    if (userExists) {
 	    	errors.push({ msg: 'This email is not allowed' });
 	    } 

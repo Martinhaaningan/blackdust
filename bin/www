@@ -103,3 +103,5 @@ process.on('SIGINT', function() {
   // some other closing procedures go here
   process.exit(0);
 });
+
+module.exports = server;

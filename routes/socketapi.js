@@ -7,13 +7,17 @@ socketapi.io = io;
 //lytter på login event, sæt en login emit på frontend
 
 io.on("connection", function(socket) {
+
     console.log( "A user connected" );
+    console.log(socket.handshake.session);
+
     // Accept a login event with user's data
 
     socket.on("login", function(userdata) {
-        console.log(socket); 
-        //socket.handshake.session.userdata = userdata;
+        console.log( "A user logged in" );
         //socket.handshake.session.save();
+        console.log(socket.handshake);
+        console.log(socket.handshake.session);
           
     });
     socket.on("logout", function(userdata) {
@@ -23,7 +27,6 @@ io.on("connection", function(socket) {
         }
     });        
 });
-
 
 
 
