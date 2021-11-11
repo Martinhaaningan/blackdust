@@ -6,3 +6,20 @@ body {
 a {
   color: #00B7FF;
 }
+
+header {
+width: 20%;
+height: 100%;
+float:  left;
+background-color: black;
+}
+
+header p {
+  color: white;
+  margin: 10px;
+}
+
+input {
+  margin: 10px;
+
+}

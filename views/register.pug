@@ -1,0 +1,18 @@
+extends layout
+
+block content
+	section
+		form(method='post' action='/users/register' enctype='multipart/form-data' )
+			input(type='email' minlength='6' name='email' required placeholder='Email')
+			input(type='password' minlength='6' name='password' required placeholder='Password')
+			input(type='password' minlength='6' name='passwordr' required placeholder='Repeat Password')
+			input(type='submit' value='Sign up')
+			if errors != undefined && errors.length != 0
+				each error in errors
+					div(role='alert' id='a1') #{error.msg}
+			if success_msg != ''
+				div(role='alert' id='a2') #{success_msg}
+			if error_msg != ''
+				div(role='alert' id='a3') #{error_msg}
+			if error != ''
+				div(role='alert' id='a4') #{error}

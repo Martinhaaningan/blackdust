@@ -1,5 +1,3 @@
-
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -10,6 +8,11 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const passport = require('passport');
 const mongoose = require('mongoose');
+const sharedsession = require("express-socket.io-session");
+
+var socket_io = require( "socket.io" );
+var io = socket_io();
+
 
 //Mongoose connection
 mongoose.connect(process.env.DB_HOST, {
@@ -35,12 +38,28 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(flash());
+
 app.use(session(                        // setup session
     {
         secret: '&/()=fghjklTYUIFGHJVBNM&5678DFcfghj¤%&',  // footprints of the keyboard cat
         resave: true,
         saveUninitialized: true
   }));
+//deler sessions objectet med socket.io
+
+io.use(sharedsession(session, {
+    autoSave:true
+})); 
+io.of('/namespace').use(sharedsession(session, {
+    autoSave: true
+}));
+
+
+// Passport middleware
+app.use(passport.initialize());         // init passport
+app.use(passport.session());            // connect passport and sessions
+require('./services/passport')(passport);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
