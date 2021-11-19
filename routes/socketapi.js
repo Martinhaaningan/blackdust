@@ -1,32 +1,18 @@
-var socket_io = require( "socket.io" );
-var io = socket_io();
-var socketapi = {};
-socketapi.io = io;
-
+var app = require('express');
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+var socketapi = {}
+socketapi = io;
 //sætter sessions data for socket.io som er delt fra express-session
 //lytter på login event, sæt en login emit på frontend
 
-io.on("connection", function(socket) {
-
-    console.log( "A user connected" );
-    console.log(socket.handshake.session);
-
-    // Accept a login event with user's data
-
-    socket.on("login", function(userdata) {
-        console.log( "A user logged in" );
-        //socket.handshake.session.save();
-        console.log(socket.handshake);
-        console.log(socket.handshake.session);
-          
+io.on('connection', function(socket){
+    socket.on('loggedIn', function() {
+    console.log("User with ID: " + socket.handshake.session.passport.user + " is logged in"); 
     });
-    socket.on("logout", function(userdata) {
-        if (socket.handshake.session.userdata) {
-            delete socket.handshake.session.userdata;
-            socket.handshake.session.save();
-        }
-    });        
 });
+
+
 
 
 
