@@ -22,8 +22,20 @@ header p {
   color: white;
   margin: 10px;
 }
-
-
+#svg{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+.tile{
+  position: absolute;
+  z-index: 1;
+}
+.tile:hover {
+  stroke: #495B87;
+  z-index: 100;
+}
 input {
   margin: 10px;
 
