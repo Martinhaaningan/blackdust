@@ -7,6 +7,11 @@ const $ = function(foo) {
     return document.getElementById(foo);
 }
 
+//the game object
+var Game = {};
+
+socket.emit('handshake');
+
 //
 // Asset loader
 //
@@ -16,8 +21,7 @@ var Loader = {
 };
 
 Loader.loadImage = function (key, src) {
-    var img = new Image();
-
+    var img = new Image();  
     var d = new Promise(function (resolve, reject) {
         img.onload = function () {
             this.images[key] = img;
@@ -38,21 +42,16 @@ Loader.getImage = function (key) {
 };
 
 
-//the game object
-var Game = {};
 
 Game.setBoard = function () {
     this.board = $('board');
-    this.svg = $('svg');
     let body = $("body");
-    let width = body.clientWidth;  
+    let width = body.clientWidth;
+    let height = body.clientHeight;
     this.board.setAttribute("width", width);
-    this.svg.setAttribute("width", width);
-    let realWidth = this.board.clientWidth;
-    let height = 770;
-    this.board.setAttribute("height", height + '%');
-    this.svg.setAttribute("height", height + '%');
+    this.board.setAttribute("height", height);
     this.board.style.backgroundColor ="black";
+    Game.board.size = [width,height];
 };
 
 Game.load = function () {
@@ -60,98 +59,135 @@ Game.load = function () {
         Loader.loadImage('tiles', './images/tiles.png')
     ];
 };
-
  
 Game.run = function (context) {
   this.ctx = context;
-    var p = this.load();
-    Promise.all(p).then(function (loaded) {
-        this.tileAtlas = Loader.getImage('tiles');
-        Game.render();
-      }.bind(this));
+  var p = this.load();
+  Promise.all(p).then(function (loaded) {
+    this.tileAtlas = Loader.getImage('tiles');
+    let hexGrid  = Game.initGrid(4);
+    Game.render(hexGrid);
+    Game.clicks(this.ctx);
+    Game.mouseOver(this.ctx);
+  }.bind(this));
 }
 
-var map = {
-    cols: 5,
-    rows: 5,
-    twidth: 160, // Tile height og width i pixels
-    theight: 140,
-    tx: 120,
-    ty: 140,
-    tiles: [
-        0, 0, 0, 0, 0,  
-        0, 1, 2, 2, 0,  
-        0, 3, 4, 1, 0,
-        0, 0, 5, 0, 0,
-        0, 0, 0, 0, 0
-    ],
-    getTile: function (col, row) {
-        return this.tiles[row * map.cols + col];
-    }
-};
 
-function tileClickable (x, y, width, height, c, r) {
-  let tile = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
-  tile.setAttribute('width', width);
-  tile.setAttribute('height', height);
-  tile.setAttribute('points', "40,1 120,1 159,69 119,139 41,139 1,69");
-  tile.setAttribute("transform", "translate("+ x +","+ y +")");
-  tile.setAttribute("stroke-width", "2px");
-  tile.setAttribute("stroke", "#1C336A");
-  tile.setAttribute("fill","transparent");
-  tile.setAttribute("id", c+","+r);
-  tile.setAttribute("class", "tile");
-  let svg = $('svg');
-  svg.appendChild(tile);
+
+
+socket.on('hello', function(map){
+  console.log("A map has been served for the user.");
+  console.log(map);
+  Game.render(map.tiles);
+});
+
+Game.HexCell = function (x,y,z, terrain){
+this._x = x;
+this._y = y; 
+this._z = z;
+this.terrain = terrain;
 }
 
-Game.render = function () {
-    for (var c = 0; c < map.cols; c++) {
-        for (var r = 0; r < map.rows; r++) {
-            
-            var tile = map.getTile(c, r);
-            let tx = map.tx*c;
-            let ty = map.ty*r;
-            if (c % 2 == 1) {
-                ty = ty + 70;
-              }
-
-            if (tile == 0) {
-              tileClickable(tx,ty, map.twidth, map.theight, c, r);
-            }
-
-            if (tile !== 0) { // 0 => empty tile
-
-                this.ctx.drawImage(
-                    this.tileAtlas, // image
-                    (tile - 1) * map.twidth, // source x
-                    0, // source y
-                    map.twidth, // source width
-                    map.theight, // source height
-                    tx,  // target x
-                    ty, // target y
-                    map.twidth, // target width
-                    map.theight // target height
-                );
-                tileClickable(tx,ty, map.twidth, map.theight, c, r);
-            }
+//Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
+Game.initGrid = function(mapSize){
+  mapSize = Math.max(1,mapSize);
+  let gridArray = [];
+  let cnt = 0;
+  for(let i = -mapSize; i < mapSize +1; i += 1) {
+    for(let j = -mapSize; j < mapSize +1; j += 1) {
+      for(let k = -mapSize; k < mapSize +1; k += 1) {
+        if (i + j + k == 0) {
+          let terrain = null;
+          gridArray.push(new Game.HexCell(i, j, k, terrain));
+          cnt += 1;
         }
+      }
     }
+  }
+  return gridArray;
+}
+
+Game.render = function (gridArray) {
+
+  let edgeLength = 80;
+  let edgeW = edgeLength * 3/2;
+  let edgeH = edgeLength * Math.sqrt(3) / 2;
+  let x, y, z;
+  let posX, posY;
+  let centerX = Game.board.size[0] /2;
+  let centerY = Game.board.size[1] /2;
+
+  for (let i = 0; i < gridArray.length; i++) {
+    [x,y,z] = [gridArray[i]._x, gridArray[i]._y, gridArray[i]._z];
+    let terrain = gridArray[i].terrain;
+    posX = x* edgeW + centerX;
+    posY = (-y+z) * edgeH + centerY;
+    //console.log(posX,posY);
+    let tx = posX + Math.cos(0) * edgeLength;
+    let ty = posY + Math.sin(0) * edgeLength;
+    this.ctx.moveTo(tx, ty);
+    gridArray[i].points = [];
+    if (terrain !== null){
+      this.ctx.drawImage(
+        this.tileAtlas, //image 
+        (terrain)* 160, // source x
+        0,  //source y
+        160, //source width
+        160, //source heigh
+        tx -159, //target x
+        ty - 69,//target y
+        154, //target width
+        137 //target height
+        );
+    }
+    if (terrain == null) {
+    for (let j = 1; j <= 6; j++) {
+      let x = posX + Math.cos(j / 6 * (Math.PI *2)) *edgeLength;
+      let y = posY + Math.sin(j / 6 * (Math.PI *2)) *edgeLength;
+      let points = {x,y};
+      this.ctx.lineTo(x, y);
+      gridArray[i].points.push(points);
+    }
+    this.ctx.fill();
+    this.ctx.strokeStyle = "#113f67";
+    this.ctx.stroke();
+    Game.grid = gridArray;
+    }
+  }
 };
 
+Game.clicks = function(ctx) {
+  $('board').addEventListener('mousedown', function(evt){
+    evt.preventDefault();
+    let mouse = {
+    x: evt.clientX,
+    y: evt.clientY
+    }
 
-
-
-/*function init(){
-  setBoard();
-
-  socket.emit('loggedIn');
-  socket.on('hello', function(email){
-    console.log('hello user! Your email is:' + email);
+    if (ctx.isPointInPath(mouse.x, mouse.y)) {
+      console.log("hi!", mouse.x, mouse.y);
+    }
   });
 }
-*/
+
+//virker ikke
+Game.mouseOver = function(ctx) {
+  $('board').addEventListener('mousedown', function(evt){
+    evt.preventDefault();
+    let mouse = {
+    x: evt.clientX,
+    y: evt.clientY
+    }
+
+    if (ctx.isPointInPath(mouse.x, mouse.y)) {
+      ctx.strokeStyle = "#ffffff";
+    }
+  });
+}
+
+    
 window.onload = function () {
+
     Game.setBoard();
     let context = $('board').getContext('2d');
     Game.run(context);
