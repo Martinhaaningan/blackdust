@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const game = require('../controllers/game');
+const { forwardAuthenticated, ensureAuthenticated} = require('../services/auth');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -26,9 +27,18 @@ module.exports = function (io) {
       
       let map = await game.getMap(userID);
       socket.emit('hello', map);
-      });
-  
     });
+  
+    socket.on('tileClicked', async function(coords){
+      console.log('The user clicked on tile: ' + coords);
+
+      let userID = socket.handshake.session.passport.user;
+      let newMap = await game.rollNewTile(userID, coords);
+      socket.emit('rolledTile', newMap);
+    });
+});
+
+
 
 
 

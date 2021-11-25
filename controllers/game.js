@@ -7,35 +7,52 @@ exports.getEmail = async function(Id) {
 	return user.email;
 }
 
-function hexCell (x,y,z,terrain){
+function hexCell (x,y,z){
 this._x = x;
 this._y = y; 
 this._z = z;
-this.terrain = terrain;
 }
+function tile (hexCell, terrain){
+	this.hexCell = hexCell;
+	this.terrain = terrain;
+}
+//https://www.tutorialspoint.com/returning-the-highest-number-from-object-properties-value-javascript
+const findHighest = function(obj) {
+   const values = Object.values(obj);
+   const max = Math.max.apply(Math, values);
+   for(key in obj){
+      if(obj[key] === max){
+         return {
+            [key]: max
+         };
+      };
+   };
+};
 
 //Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
 function initGrid (mapSize){
   mapSize = Math.max(1,mapSize);
   let gridArray = [];
+  let terrain = "";
   let cnt = 0;
   for(let i = -mapSize; i < mapSize +1; i += 1) {
     for(let j = -mapSize; j < mapSize +1; j += 1) {
       for(let k = -mapSize; k < mapSize +1; k += 1) {
         if (i + j + k == 0) {
-        	let terrain;
+        	let terrain = {};
         	if (i == 0 && j == 0 && k == 0 ) {
         		terrain = 0;
         	} else {
         		terrain = Math.floor(Math.random()* 4 + 1);
         	}
-        	
-          gridArray.push(new hexCell(i, j, k, terrain));
+
+          gridArray.push(new tile(new hexCell(i, j, k), terrain));
           cnt += 1;
         }
       }
     }
   }
+  console.log(gridArray);
   return gridArray;
 }
 
@@ -53,5 +70,32 @@ exports.getMap = async function(Id) {
 		map.save();
 	}
 	return map;
+}
+
+exports.rollNewTile = async function(Id, coords) {
+	let user = await userModel.findById({_id: Id});
+	let map = await mapModel.findOne({owner: user._id});
+
+	let tile = JSON.parse(coords);
+	console.log("JSON was parsed ", tile);
+
+	let tileExists = await mapModel.exists({$and: [{tiles: tile}, {owner: user._id}]});
+	console.log(tileExists);
+	if(!tileExists) {
+		// let width;
+		// for (let i in map.tiles.hexCell) {
+		// 	console.log(map.tiles.hexCell[i]);
+		// 	width = findHighest(map.tiles.hexCell[i]);
+		// }
+		// console.log(width);
+		tile.terrain = Math.floor(Math.random()* 4 + 1);
+		map.tiles.push(tile);
+		console.log(map);
+
+		let newMap = await mapModel.findOneAndUpdate({owner: user._id}, map, {new: true});
+		console.log(newMap);
+		return newMap;
+	}
+	
 }
 

@@ -2,9 +2,7 @@ const mongoose = require('mongoose');
 
 const map = mongoose.Schema({
 	owner: {
-		type: Schema.Types.ObjectId, 
-        ref: "User",  //ObjectID på brugeren som ejer map
-		required:true
+		type: String
 	},
 	capital: { //Navn på hovedstad
 		type: String,
@@ -19,7 +17,11 @@ const map = mongoose.Schema({
 	default: Date.now
 	},
 	tiles: {
-		type: Array //array med objectIDs på alle tiles tilhørende det pågældende map
+		type: Object //array med objectIDs på alle tiles tilhørende det pågældende map
+	},
+	width: {
+		type: Number,
+		default: 1
 	}
 
 });
