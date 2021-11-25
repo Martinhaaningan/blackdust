@@ -16,6 +16,6 @@ Nye features:
 Man kan nu trække nye terræn felter
 
 Issues: 
-Første gang man går ind i spillet kan beskeden "map is null" forekomme på frontenden. 
+Første gang man går ind i spillet kan beskeden "map is null" forekomme i browserkonsollen. 
 Der vil blive kaldt et reload sådan at der er et map at renderer men fejlmeldingen er der stadig.
 Indtil videre er spillet begrændset til 5 felter i diameter.
