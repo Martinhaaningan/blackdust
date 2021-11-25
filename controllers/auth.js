@@ -49,8 +49,8 @@ exports.postRegister = async function (req, res, next) {
 				if (err) throw err;
 				newUser.password = hash;
 				newUser.save().then(success => {
-					req.flash('success_msg','You are now registered and can proceed to create a character.');
-					res.redirect('/users/newchar');
+					req.flash('success_msg','You are now registered.');
+					res.redirect('/');
 				}).catch(err => console.log(err));
 
 			});
