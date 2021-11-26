@@ -20,20 +20,24 @@ Game.initPlayer = function(){
   
   socket.emit('handshake');
   socket.on('hello', function(map){
-    console.log("A map has been served for the user.");  
-    map  = Game.generateBlanks(map);
+    console.log("A map has been served for the user.");
+    Game.map = map;  
+    map  = Game.initGrid(map);
     console.log(map);
     Game.render(map.tiles);
     });
 }
 
-socket.on('rolledTile', function(newMap) {
+
+//bør ikke sende hele kortet og generer det forfra da det giver dublering, send den enkelte tile istedet
+socket.on('rolledTile', function(newTile) {
   console.log('A tile has been revealed. Reloading the map');
 
   //let hexGrid = Game.initGrid(newMap.size, newMap);
-  newMap = Game.generateBlanks(newMap);
-  console.log(newMap);
-  Game.render(newMap.tiles);
+  let newTiles = Game.makeNewNeighbors(newTile, Game.map);
+  newTiles.push(newTile);
+  console.log(newTiles);
+  Game.render(newTiles);
 });
 
 
@@ -128,15 +132,33 @@ function checkIfExists(hex, mapTiles){
      }
    }
 }
+//tag kun naboer med og check på dem. Tilføj det pågældende tile bagefter
+Game.makeNewNeighbors = function(newTile, map){
+  let neighbors = getNeighbors(newTile.hexCell);
+  let newTiles = [];
+  console.log("n",newTile);
+    for (let n in neighbors) {
+      let found = checkIfExists(neighbors[n], map.tiles);
+        console.log("--",neighbors[n], found);
+        if (!found) {
+          let terrain = null;
+          //console.log(neighbors[n]);
+          //Uncaught TypeError: tile is not a constructor
+          newTiles.push(new tile(neighbors[n], terrain));
+        }
+      }
+  
+  return newTiles;
+}
 
-Game.generateBlanks = function(map){
+Game.initGrid = function(map){
   for (let t in map.tiles) {
     let neighbors = getNeighbors(map.tiles[t].hexCell);
     //console.log("n",neighbors);
       for (let n in neighbors) {
         let found = checkIfExists(neighbors[n], map.tiles);
         console.log("--",neighbors[n], found);
-        if (found === undefined) {
+        if (!found) {
           let terrain = null;
           //console.log(neighbors[n]);
           map.tiles.push(new tile(neighbors[n], terrain));
@@ -147,38 +169,38 @@ Game.generateBlanks = function(map){
 }
 
 //Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
-Game.initGrid = function(mapSize, map){
-  mapSize = Math.max(1,mapSize);
-  if (map === null) {
-    location.reload();
-  }
-  let gridArray = map.tiles;
-  let cnt = 0;
-  for(let i = -mapSize; i < mapSize +1; i += 1) {
-    for(let j = -mapSize; j < mapSize +1; j += 1) {
-      for(let k = -mapSize; k < mapSize +1; k += 1) {
-        if (i + j + k == 0) {       
+// Game.initGrid = function(mapSize, map){
+//   mapSize = Math.max(1,mapSize);
+//   if (map === null) {
+//     location.reload();
+//   }
+//   let gridArray = map.tiles;
+//   let cnt = 0;
+//   for(let i = -mapSize; i < mapSize +1; i += 1) {
+//     for(let j = -mapSize; j < mapSize +1; j += 1) {
+//       for(let k = -mapSize; k < mapSize +1; k += 1) {
+//         if (i + j + k == 0) {       
 
-          //checker de generede tiles om de allerede er tilføjet fra map.tiles
-          let found;
-          for (let l in map.tiles) {
-            if (map.tiles[l].hexCell._x === i && map.tiles[l].hexCell._y === j && map.tiles[l].hexCell._z === k) {
-              found = true;
-            }
-          }
-          //hvis en tile ikke er fundet oprettes en ny blank tile
-          if (!found) {
-            let terrain = null;
-            gridArray.push(new tile(new hexCell(i, j, k), terrain));
-            cnt += 1;      
-          }
-        }
-      }
-    }
-  }
-  console.log(gridArray);
-  return gridArray; 
-}
+//           //checker de generede tiles om de allerede er tilføjet fra map.tiles
+//           let found;
+//           for (let l in map.tiles) {
+//             if (map.tiles[l].hexCell._x === i && map.tiles[l].hexCell._y === j && map.tiles[l].hexCell._z === k) {
+//               found = true;
+//             }
+//           }
+//           //hvis en tile ikke er fundet oprettes en ny blank tile
+//           if (!found) {
+//             let terrain = null;
+//             gridArray.push(new tile(new hexCell(i, j, k), terrain));
+//             cnt += 1;      
+//           }
+//         }
+//       }
+//     }
+//   }
+//   console.log(gridArray);
+//   return gridArray; 
+// }
 
 
 

@@ -118,7 +118,7 @@ exports.rollNewTile = async function(Id, coords) {
 
 		let newMap = await mapModel.findOneAndUpdate({owner: user._id}, map, {new: true});
 
-		return newMap;
+		return tile;
 	}
 	
 }
