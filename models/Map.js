@@ -19,9 +19,8 @@ const map = mongoose.Schema({
 	tiles: {
 		type: Object //array med objectIDs på alle tiles tilhørende det pågældende map
 	},
-	width: {
-		type: Number,
-		default: 1
+	size: {
+		type: Number
 	}
 
 });

@@ -21,16 +21,19 @@ Game.initPlayer = function(){
   socket.emit('handshake');
   socket.on('hello', function(map){
     console.log("A map has been served for the user.");  
-    let hexGrid  = Game.initGrid(2, map);
-    Game.render(hexGrid);
+    map  = Game.generateBlanks(map);
+    console.log(map);
+    Game.render(map.tiles);
     });
 }
 
 socket.on('rolledTile', function(newMap) {
   console.log('A tile has been revealed. Reloading the map');
 
-  let hexGrid = Game.initGrid(2, newMap);
-  Game.render(hexGrid);
+  //let hexGrid = Game.initGrid(newMap.size, newMap);
+  newMap = Game.generateBlanks(newMap);
+  console.log(newMap);
+  Game.render(newMap.tiles);
 });
 
 
@@ -99,6 +102,50 @@ function tile (hexCell, terrain){
   this.terrain = terrain;
 }
 
+
+function getNeighbors(hex) {
+  var vectors = [
+    {x: 1,y: 0,z: -1}, {x: 1,y: -1,z: 0}, {x: 0,y: -1,z: 1},
+    {x: -1,y: 0,z: 1}, {x: -1,y: 1,z: 0}, {x: 0,y: +1,z: -1} 
+    ];
+  let neighbors = [];
+  for (let i in vectors) {
+    let vector = Object.values(vectors[i]);
+    let val = Object.values(hex);
+    let neighbor = {_x: val[0] + vector[0], _y: val[1] + vector[1], _z: val[2] + vector[2]};
+    neighbors.push(neighbor); 
+  }
+  return neighbors;
+}
+
+function checkIfExists(hex, mapTiles){
+  // console.log(hex);
+  // console.log(mapTiles);
+  for (let l in mapTiles) {
+    if (mapTiles[l].hexCell._x === hex._x && mapTiles[l].hexCell._y === hex._y && mapTiles[l].hexCell._z === hex._z) {
+      return true;
+
+     }
+   }
+}
+
+Game.generateBlanks = function(map){
+  for (let t in map.tiles) {
+    let neighbors = getNeighbors(map.tiles[t].hexCell);
+    //console.log("n",neighbors);
+      for (let n in neighbors) {
+        let found = checkIfExists(neighbors[n], map.tiles);
+        console.log("--",neighbors[n], found);
+        if (found === undefined) {
+          let terrain = null;
+          //console.log(neighbors[n]);
+          map.tiles.push(new tile(neighbors[n], terrain));
+        }
+      }
+  }
+  return map;
+}
+
 //Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
 Game.initGrid = function(mapSize, map){
   mapSize = Math.max(1,mapSize);
@@ -110,14 +157,16 @@ Game.initGrid = function(mapSize, map){
   for(let i = -mapSize; i < mapSize +1; i += 1) {
     for(let j = -mapSize; j < mapSize +1; j += 1) {
       for(let k = -mapSize; k < mapSize +1; k += 1) {
-        if (i + j + k == 0) { 
-          let found;
+        if (i + j + k == 0) {       
 
+          //checker de generede tiles om de allerede er tilføjet fra map.tiles
+          let found;
           for (let l in map.tiles) {
             if (map.tiles[l].hexCell._x === i && map.tiles[l].hexCell._y === j && map.tiles[l].hexCell._z === k) {
               found = true;
             }
           }
+          //hvis en tile ikke er fundet oprettes en ny blank tile
           if (!found) {
             let terrain = null;
             gridArray.push(new tile(new hexCell(i, j, k), terrain));
@@ -130,6 +179,8 @@ Game.initGrid = function(mapSize, map){
   console.log(gridArray);
   return gridArray; 
 }
+
+
 
 function tileClick() {
 
@@ -196,48 +247,15 @@ Game.render = function (gridArray) {
       let x = posX + Math.cos(j / 6 * (Math.PI *2)) *edgeLength;
       let y = posY + Math.sin(j / 6 * (Math.PI *2)) *edgeLength;
       points += ' '+x+','+y+' ';
-      // this.ctx.lineTo(x, y);
     }
     tile.setAttribute('points', points);
     let svg = $('svg');
 
     svg.appendChild(tile);
-    // this.ctx.fill();
-    // this.ctx.strokeStyle = "#113f67";
-    // this.ctx.stroke();
+
     Game.grid = gridArray;
   }
 };
-// Tracker mouse clicks på canvas
-// Game.clicks = function(ctx) {
-//   $('board').addEventListener('mousedown', function(evt){
-//     evt.preventDefault();
-//     let mouse = {
-//     x: evt.clientX,
-//     y: evt.clientY
-//     }
-
-//     if (ctx.isPointInPath(mouse.x, mouse.y)) {
-//       console.log("hi!", mouse.x, mouse.y);
-//     }
-//   });
-// }
-
-// //virker ikke
-// Game.mouseOver = function(ctx) {
-//   $('board').addEventListener('mousedown', function(evt){
-//     evt.preventDefault();
-//     let mouse = {
-//     x: evt.clientX,
-//     y: evt.clientY
-//     }
-
-//     if (ctx.isPointInPath(mouse.x, mouse.y)) {
-//       ctx.strokeStyle = "#ffffff";
-//     }
-//   });
-// }
-
     
 window.onload = function () {
   Game.initPlayer();
