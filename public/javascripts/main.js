@@ -1,5 +1,6 @@
 'use strict'
 
+
 const $ = function(foo) {
 
     return document.getElementById(foo);
@@ -15,32 +16,35 @@ var Loader = {
     images: {}
 };
 
+Game.initMap =  function(){
+  socket.emit('hello');
 
-Game.initPlayer = function(){
-  
-  socket.emit('handshake');
-  socket.on('hello', function(map){
+  socket.on('handshake', function(map){
     console.log("A map has been served for the user.");
-    Game.map = map;  
-    map  = Game.initGrid(map);
-    console.log(map);
+ 
+    map  =  Game.initGrid(map);
+    let mapSize = Game.getMapSize(map.tiles);
+    map.size = mapSize;
+    
+    Game.setBoard(mapSize);
     Game.render(map.tiles);
-    });
-}
 
+    Game.map = map;
+    });
+
+}
 
 //bør ikke sende hele kortet og generer det forfra da det giver dublering, send den enkelte tile istedet
 socket.on('rolledTile', function(newTile) {
-  console.log('A tile has been revealed. Reloading the map');
+  console.log('A tile has been revealed. Rendering...');
 
-  //let hexGrid = Game.initGrid(newMap.size, newMap);
   let newTiles = Game.makeNewNeighbors(newTile, Game.map);
   newTiles.push(newTile);
   console.log(newTiles);
   Game.render(newTiles);
 });
 
-
+// fra https://github.com/mozdevs/gamedev-js-tiles
 Loader.loadImage = function (key, src) {
     var img = new Image();  
     var d = new Promise(function (resolve, reject) {
@@ -63,18 +67,29 @@ Loader.getImage = function (key) {
 };
 
 
+Game.setBoard = function (mapSize) {
 
-Game.setBoard = function () {
     this.board = $('board');
     this.svg = $('svg');
+
+    let mapWidth = mapSize[0] * 2 * 130; 
+    let mapHeight = mapSize[1] * 2 * 140;
+
     let body = $("body");
     let width = body.clientWidth;
     let height = body.clientHeight;
+    if (mapWidth > width ) {
+      width = mapWidth + 160;
+    }
+    if (mapHeight > height ) {
+      height = mapHeight + 160;
+    }
     this.board.setAttribute("width", width);
     this.board.setAttribute("height", height);
-    this.board.style.backgroundColor ="black";
+    this.board.style.backgroundColor = "black";
     this.svg.setAttribute("width", width);
     this.svg.setAttribute("height", height);
+
     Game.board.size = [width,height];
 };
 
@@ -89,10 +104,8 @@ Game.run = function (context) {
   var p = this.load();
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
-
-    //Game.clicks(this.ctx);
-    //Game.mouseOver(this.ctx);
   }.bind(this));
+
 }
 
 function hexCell (x,y,z){
@@ -109,41 +122,38 @@ function tile (hexCell, terrain){
 
 function getNeighbors(hex) {
   var vectors = [
-    {x: 1,y: 0,z: -1}, {x: 1,y: -1,z: 0}, {x: 0,y: -1,z: 1},
-    {x: -1,y: 0,z: 1}, {x: -1,y: 1,z: 0}, {x: 0,y: +1,z: -1} 
+    {x: 1,y: 0,z: -1}, {x: 1,y: -1,z: 0}, 
+    {x: 0,y: -1,z: 1}, {x: -1,y: 0,z: 1}, 
+    {x: -1,y: 1,z: 0}, {x: 0,y: +1,z: -1} 
     ];
   let neighbors = [];
   for (let i in vectors) {
     let vector = Object.values(vectors[i]);
     let val = Object.values(hex);
-    let neighbor = {_x: val[0] + vector[0], _y: val[1] + vector[1], _z: val[2] + vector[2]};
+    let neighbor = {_x: val[0] + vector[0], _y: val[1] + 
+      vector[1], _z: val[2] + vector[2]};
     neighbors.push(neighbor); 
   }
   return neighbors;
 }
 
 function checkIfExists(hex, mapTiles){
-  // console.log(hex);
-  // console.log(mapTiles);
   for (let l in mapTiles) {
     if (mapTiles[l].hexCell._x === hex._x && mapTiles[l].hexCell._y === hex._y && mapTiles[l].hexCell._z === hex._z) {
       return true;
-
      }
    }
 }
 //tag kun naboer med og check på dem. Tilføj det pågældende tile bagefter
+
 Game.makeNewNeighbors = function(newTile, map){
   let neighbors = getNeighbors(newTile.hexCell);
   let newTiles = [];
-  console.log("n",newTile);
     for (let n in neighbors) {
       let found = checkIfExists(neighbors[n], map.tiles);
-        console.log("--",neighbors[n], found);
         if (!found) {
           let terrain = null;
-          //console.log(neighbors[n]);
-          //Uncaught TypeError: tile is not a constructor
+          Game.map.tiles.push(new tile(neighbors[n], terrain));
           newTiles.push(new tile(neighbors[n], terrain));
         }
       }
@@ -154,54 +164,16 @@ Game.makeNewNeighbors = function(newTile, map){
 Game.initGrid = function(map){
   for (let t in map.tiles) {
     let neighbors = getNeighbors(map.tiles[t].hexCell);
-    //console.log("n",neighbors);
       for (let n in neighbors) {
         let found = checkIfExists(neighbors[n], map.tiles);
-        console.log("--",neighbors[n], found);
         if (!found) {
           let terrain = null;
-          //console.log(neighbors[n]);
           map.tiles.push(new tile(neighbors[n], terrain));
         }
       }
   }
   return map;
 }
-
-//Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
-// Game.initGrid = function(mapSize, map){
-//   mapSize = Math.max(1,mapSize);
-//   if (map === null) {
-//     location.reload();
-//   }
-//   let gridArray = map.tiles;
-//   let cnt = 0;
-//   for(let i = -mapSize; i < mapSize +1; i += 1) {
-//     for(let j = -mapSize; j < mapSize +1; j += 1) {
-//       for(let k = -mapSize; k < mapSize +1; k += 1) {
-//         if (i + j + k == 0) {       
-
-//           //checker de generede tiles om de allerede er tilføjet fra map.tiles
-//           let found;
-//           for (let l in map.tiles) {
-//             if (map.tiles[l].hexCell._x === i && map.tiles[l].hexCell._y === j && map.tiles[l].hexCell._z === k) {
-//               found = true;
-//             }
-//           }
-//           //hvis en tile ikke er fundet oprettes en ny blank tile
-//           if (!found) {
-//             let terrain = null;
-//             gridArray.push(new tile(new hexCell(i, j, k), terrain));
-//             cnt += 1;      
-//           }
-//         }
-//       }
-//     }
-//   }
-//   console.log(gridArray);
-//   return gridArray; 
-// }
-
 
 
 function tileClick() {
@@ -215,78 +187,92 @@ function tileClick() {
   //}
 }
 
+Game.getMapSize = function(gridArray) {
+  let size = [0,0];
+  for(let t in gridArray) {
+   let y = Math.abs(gridArray[t].hexCell._y)*100/100;
+   let x = Math.abs(gridArray[t].hexCell._x)*100/100;
+     if (y > size[1]) {
+     size[1] = y;
+    }
+    if (x > size[0])
+      size[0] = x;
+  }
+  return size; 
+}
+
+
 
 Game.render = function (gridArray) {
-  let height = 160;
-  let width = 160;
+
   let edgeLength = 80;
   let edgeW = edgeLength * 3/2;
   let edgeH = edgeLength * Math.sqrt(3) / 2;
   let x, y, z;
-  let posX, posY;
+  
   let centerX = Game.board.size[0] /2;
   let centerY = Game.board.size[1] /2;
-  this.ctx.clearRect(0,0, this.ctx.width,this.ctx.height);
+
+
   for (let i = 0; i < gridArray.length; i++) {
     [x,y,z] = [gridArray[i].hexCell._x, gridArray[i].hexCell._y, gridArray[i].hexCell._z];
     let terrain = gridArray[i].terrain;
-    posX = x* edgeW + centerX;
-    posY = (-y+z) * edgeH + centerY;
-    //console.log(posX,posY);
-    let tx = posX + Math.cos(0) * edgeLength;
-    let ty = posY + Math.sin(0) * edgeLength;
+    
+    let tx = x* edgeW + centerX;
+    let ty = (-y+z) * edgeH + centerY;
+
     this.ctx.moveTo(tx, ty);
-
-    let coords = JSON.stringify(gridArray[i]);
-
+    
     if (terrain !== null){
       this.ctx.drawImage(
         this.tileAtlas, //image 
         (terrain)* 160, // source x
-        0,  //source y
-        160, //source width
-        160, //source heigh
-        tx -158, //target x
-        ty - 68,//target y
-        158, //target width
-        138 //target height
+        0,        //source y
+        160,      //source width
+        140,      //source heigh
+        tx -79,   //target x
+        ty -69,  //target y
+        158,      //target width
+        138       //target height
         );
     }
 
+
     let tile = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
-    tile.setAttribute('width', width);
-    tile.setAttribute('height', height);
+    let coords = JSON.stringify(gridArray[i]);
+    
     tile.setAttribute('stroke-width','2px');
     tile.setAttribute('stroke','#1C336A');
     tile.setAttribute('fill','transparent');
     tile.setAttribute("id", x + '.' + y + '.' + z);
     tile.setAttribute('class','tile');
-    tile.setAttribute('opacity','0.5');
+    tile.setAttribute('opacity','0.7');
     tile.setAttribute('coords', coords);
-    tile.addEventListener('click', tileClick);
+    tile.addEventListener('mouseup', tileClick);
+
     let points = '';
     for (let j = 1; j <= 6; j++) {
-      let x = posX + Math.cos(j / 6 * (Math.PI *2)) *edgeLength;
-      let y = posY + Math.sin(j / 6 * (Math.PI *2)) *edgeLength;
+      let x = tx + Math.cos(j / 6 * (Math.PI *2)) *edgeLength;
+      let y = ty + Math.sin(j / 6 * (Math.PI *2)) *edgeLength;
       points += ' '+x+','+y+' ';
     }
     tile.setAttribute('points', points);
     let svg = $('svg');
 
     svg.appendChild(tile);
-
-    Game.grid = gridArray;
+    
   }
+
 };
     
 window.onload = function () {
-  Game.initPlayer();
-  
-  Game.setBoard();
-  let context = $('board').getContext('2d');
+  Game.initMap();
 
+  let context = $('board').getContext('2d');
   Game.run(context);
 
+  let wrapper = $('main-wrapper');
+  panzoom(wrapper);
 }
 
 

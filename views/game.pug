@@ -2,12 +2,13 @@ doctype html
 html
   head
     title= title
-    
+    link(rel='stylesheet', href='/stylesheets/style.css')
     script(src="/javascripts/socket.io.js")
     if user
       script(src="/javascripts/main.js")
+      script(src="/javascripts/panzoom.js")
   body#body
-    .main-wrapper
+    #main-wrapper
       canvas#board
       svg#svg
-  link(rel='stylesheet', href='/stylesheets/style.css')
+  

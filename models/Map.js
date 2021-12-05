@@ -18,9 +18,6 @@ const map = mongoose.Schema({
 	},
 	tiles: {
 		type: Object //array med objectIDs på alle tiles tilhørende det pågældende map
-	},
-	size: {
-		type: Number
 	}
 
 });

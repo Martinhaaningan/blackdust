@@ -21,12 +21,11 @@ module.exports = function (io) {
     //Socket.IO here
   io.on('connection', function(socket){
 
-    socket.on('handshake', async function() {
+    socket.on('hello', async function() {
       let userID = socket.handshake.session.passport.user;
       console.log("User with ID: " + userID + " has entered the game"); 
-      
       let map = await game.getMap(userID);
-      socket.emit('hello', map);
+      socket.emit('handshake', map);
     });
   
     socket.on('tileClicked', async function(coords){
