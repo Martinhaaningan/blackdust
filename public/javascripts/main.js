@@ -6,10 +6,14 @@ const $ = function(foo) {
     return document.getElementById(foo);
 }
 
+
 const socket = io('/');
 
 //the game object
 var Game = {};
+
+Game.spells = ["spell 1", "Spell 2", "Spell 3", "Spell 4", "Tether flare"];
+Game.resources = {tether: 1000, resource1: 0, resource2: 0, resource3: 0, resource4: 0};
 
 //the asset loader
 var Loader = {
@@ -71,6 +75,7 @@ Game.setBoard = function (mapSize) {
 
     this.board = $('board');
     this.svg = $('svg');
+    this.ui = $('ui-wrapper');
 
     let mapWidth = mapSize[0] * 2 * 130; 
     let mapHeight = mapSize[1] * 2 * 140;
@@ -78,6 +83,7 @@ Game.setBoard = function (mapSize) {
     let body = $("body");
     let width = body.clientWidth;
     let height = body.clientHeight;
+
     if (mapWidth > width ) {
       width = mapWidth + 160;
     }
@@ -91,6 +97,10 @@ Game.setBoard = function (mapSize) {
     this.svg.setAttribute("height", height);
 
     Game.board.size = [width,height];
+
+
+    Game.spellsInterface(Game.spells);
+    Game.resourcesInterface(Game.resources);
 };
 
 Game.load = function () {
@@ -182,9 +192,14 @@ function tileClick() {
   let coords = tile.getAttribute('coords');
   console.log("hit! on tile: " + coords);
   //vi kan via en eventlistener sætte en aktiv spell fra vores UI
-  //if (Game.activeSpell === tetherRockets) {
-  socket.emit('tileClicked', coords);
-  //}
+  if (Game.activeSpell === 4) {
+    socket.emit('tileClicked', coords);
+    Game.activeSpell = null;
+    console.log(Game.activeSpell);
+    let btn = $('spellBtn4');
+    btn.style.opacity = '0.8';
+    btn.style.border = '1px solid #1C336A';
+  }
 }
 
 Game.getMapSize = function(gridArray) {
@@ -264,6 +279,147 @@ Game.render = function (gridArray) {
   }
 
 };
+
+
+function cycleUp() {
+console.log('click..');
+}
+
+
+function cycleDown() {
+ console.log('click..'); 
+}
+
+Game.spellsInterface = function (spells) {
+
+  let spellsUi = $('spells-ui');
+  spellsUi.style.float = 'right';
+  spellsUi.style.margin = '40px';
+  spellsUi.style.position = 'fixed';
+  spellsUi.style.right = '0';
+  spellsUi.style.width = '250px';
+
+  // let svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+  // spellsUi.appendChild(svg);
+  // let btnUp = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+  // let btnDown = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+  
+  // svg.style.height = '200px';
+  // svg.style.width = '60px';
+  // svg.style.position = 'absolute';
+  // svg.style.top = '150px';
+  // svg.style.left = '20px';
+
+  // btnUp.setAttribute('points','4,50 50,50 25,0');
+  // btnUp.setAttribute('fill', '#4E1717');
+  // btnUp.setAttribute('stroke-width','1px');
+  // btnUp.setAttribute('stroke','#ece271');
+  // btnUp.addEventListener('click', cycleUp);
+
+  // btnDown.setAttribute('points','4,80 50,80 25,130');
+  // btnDown.setAttribute('fill', '#4E1717');
+  // btnDown.setAttribute('stroke-width','1px');
+  // btnDown.setAttribute('stroke','#ece271');
+  // btnDown.addEventListener('click', cycleDown);
+
+
+  // svg.appendChild(btnUp);
+  // svg.appendChild(btnDown);
+  
+
+  for (let i in Game.spells) {
+
+    let spellCard = document.createElement('div');
+    spellCard.setAttribute('id', i);
+    spellCard.setAttribute('class', 'spellCard');
+    spellCard.style.height = '200px';
+    spellCard.style.width = '130px';
+    spellCard.style.top = 50 + 50 * i + 'px';
+    spellCard.style.left = '100px';
+    spellCard.style.backgroundColor = '#2a2938';
+    spellCard.style.border = '5px solid black';
+    spellCard.style.outline = '2px solid #1C336A';
+    spellCard.style.boxShadow = '10px -5px 30px 5px black'
+    spellCard.style.position = 'absolute';
+    spellCard.style.borderRadius = '15px';
+    spellCard.addEventListener('mouseenter', function(){
+      spellCard.style.zIndex = 1;
+    });
+
+    spellCard.addEventListener('mouseleave', function(){
+      spellCard.style.zIndex = 0;
+    });
+
+    let label = document.createElement('p');
+    label.innerHTML = Game.spells[i];
+    spellCard.appendChild(label);
+
+    let img = document.createElement('IMG');
+    img.setAttribute('src', '/images/tether.jpg');
+    img.setAttribute('width', '100%');
+    spellCard.appendChild(img);
+
+    let desc = document.createElement('p');
+    desc.innerHTML = "Launches a rocket loaded with tether at a tile";
+    desc.style.marginTop = '-4px'; 
+    spellCard.appendChild(desc);
+
+    let activateBtn = document.createElement('button');
+    let text = document.createTextNode("Cast");
+    activateBtn.setAttribute('class','button');
+    activateBtn.setAttribute('id','spellBtn' + i);
+    activateBtn.style.height = '30px';
+    activateBtn.style.width = '80%';
+    activateBtn.style.color = '#ece271';
+    activateBtn.style.backgroundColor = '#4E1717';
+    activateBtn.style.border = '1px solid #1C336A';
+    activateBtn.style.marginLeft = '12px';
+    activateBtn.style.marginTop = '7px';
+    activateBtn.style.opacity = '0.8';
+
+    activateBtn.addEventListener('click', function(){
+      console.log('clicked button');
+      Game.activeSpell = 4;
+      console.log(Game.activeSpell);
+      activateBtn.style.opacity = '1';
+      activateBtn.style.border = '1px solid #ece271';
+    });
+    activateBtn.appendChild(text);
+    spellCard.appendChild(activateBtn);
+
+    spellsUi.appendChild(spellCard);
+    }
+}
+
+Game.resourcesInterface = function(){
+  let resUi = $('resources-ui');
+  resUi.style.position = 'fixed';
+  resUi.style.top = '0';
+  resUi.style.left = '0';
+  resUi.style.width = '100%'
+  resUi.style.height = '50px';
+  resUi.style.backgroundColor = '#2a2938';
+
+  let resources = document.createElement('div');
+  resources.style.margin = 'auto';
+  let resKeys = Object.keys(Game.resources);
+  let resVals = Object.values(Game.resources);
+  for (let r in resKeys) {
+
+    let p = document.createElement('p');
+    p.innerHTML = resKeys[r] + ': ' + resVals[r];
+    p.style.float = 'left';
+    resources.appendChild(p);
+  }
+  resUi.appendChild(resources);
+}
+
+function selectCard(){
+  let card = event.target || event.srcElement;
+  let id = card.getAttribute('id');
+  console.log(id);
+  card.style.zIndex = 1;
+}
     
 window.onload = function () {
   Game.initMap();
