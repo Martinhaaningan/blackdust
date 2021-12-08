@@ -36,7 +36,7 @@ require('./services/passport')(passport);
 io.use(sharedsession(session, {
     autoSave:true
 })); 
-
+console.log(process.env.DB_HOST);
 //Mongoose connection
 mongoose.connect(process.env.DB_HOST, {
         useNewUrlParser: true,
