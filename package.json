@@ -1,10 +1,7 @@
 {
   "name": "blackdust",
   "version": "0.0.0",
-  "private": true,
-  "engines": {
-  "node": "14.17.4"
-    }
+  "private": true
   },
   "scripts": {
     "pretest": "npm install",
