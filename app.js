@@ -15,19 +15,13 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 app.io = io;
 
-//Mongoose connection
-mongoose.connect(process.env.DB_HOST, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then( function() { console.log('mongoose connection open'); })
-    .catch( function(err) { console.error(err); });
 
 const session = require("express-session")({
     secret: "f5epmygeyhcof6yjh,05yc495.y045y0",
     resave: true,
     saveUninitialized: true,
-    store: MongoStore.create(options)
+    store: MongoStore.create({ 
+        mongoUrl: process.env.DB_HOST})
 });
 var sharedsession = require("express-socket.io-session");
 
@@ -45,6 +39,13 @@ io.use(sharedsession(session, {
     autoSave:true
 })); 
 
+//Mongoose connection
+mongoose.connect(process.env.DB_HOST, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then( function() { console.log('mongoose connection open'); })
+    .catch( function(err) { console.error(err); });
 
 
 var indexRouter = require('./routes/index')(app.io);
