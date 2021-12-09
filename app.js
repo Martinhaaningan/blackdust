@@ -7,7 +7,7 @@ var logger = require('morgan');
 const flash = require('connect-flash');
 const passport = require('passport');
 const mongoose = require('mongoose');
-
+const MongoStore = require('connect-mongo');
 
 var app = express();
 
@@ -15,11 +15,19 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 app.io = io;
 
+//Mongoose connection
+mongoose.connect(process.env.DB_HOST, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })
+    .then( function() { console.log('mongoose connection open'); })
+    .catch( function(err) { console.error(err); });
+
 const session = require("express-session")({
     secret: "f5epmygeyhcof6yjh,05yc495.y045y0",
     resave: true,
     saveUninitialized: true,
-
+    store: MongoStore.create(options)
 });
 var sharedsession = require("express-socket.io-session");
 
@@ -36,14 +44,8 @@ require('./services/passport')(passport);
 io.use(sharedsession(session, {
     autoSave:true
 })); 
-console.log(process.env.DB_HOST);
-//Mongoose connection
-mongoose.connect(process.env.DB_HOST, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then( function() { console.log('mongoose connection open'); })
-    .catch( function(err) { console.error(err); });
+
+
 
 var indexRouter = require('./routes/index')(app.io);
 var usersRouter = require('./routes/users');
