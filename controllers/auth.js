@@ -45,7 +45,8 @@ exports.postRegister = async function (req, res, next) {
 				password
 			});
 
-			bcrypt.hash(newUser.password, saltRounds, async function(err, hash){
+			bcrypt.hash(newUser.password, saltRounds, 
+				async function(err, hash){
 				if (err) throw err;
 				newUser.password = hash;
 				newUser.save().then(success => {
@@ -59,14 +60,12 @@ exports.postRegister = async function (req, res, next) {
 }
 
 exports.postLogin = async function (req, res, next) {
-
     let user = await userModel.findOne({email: req.body.email});
     passport.authenticate('local', {
         successRedirect: '/', 
         failureRedirect: '/',
         failureFlash: true
     })(req, res, next); 
-
 };
 
 exports.logout = function (req, res) {

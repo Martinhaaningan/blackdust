@@ -31,7 +31,7 @@ Game.initMap =  function(){
     Game.setBoard(mapSize);
     Game.render(map.tiles);
 
-    Game.map = map;
+    return map;
     });
 
 }
@@ -112,6 +112,7 @@ Game.run = function (context) {
   var p = this.load();
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
+    this.map = Game.initMap();
   }.bind(this));
 
 }
@@ -420,7 +421,6 @@ function selectCard(){
 }
     
 window.onload = function () {
-  Game.initMap();
 
   let context = $('board').getContext('2d');
   Game.run(context);
