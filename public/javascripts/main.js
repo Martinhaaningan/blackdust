@@ -5,9 +5,8 @@ const $ = function(foo) {
 
     return document.getElementById(foo);
 }
-
-
 const socket = io('/');
+socket.emit('hello');
 
 //the game object
 var Game = {};
@@ -21,8 +20,7 @@ var Loader = {
 };
 
 Game.initMap =  function(){
-  socket.emit('hello');
-
+  
   socket.on('handshake', function(map){
     console.log("A map has been served for the user.");
  
