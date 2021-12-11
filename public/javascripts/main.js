@@ -31,7 +31,7 @@ Game.initMap =  function(){
     Game.setBoard(mapSize);
     Game.render(map.tiles);
 
-    return map;
+    Game.map = map;
     });
 
 }
@@ -112,7 +112,7 @@ Game.run = function (context) {
   var p = this.load();
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
-    this.map = Game.initMap();
+    Game.initMap();
   }.bind(this));
 
 }
