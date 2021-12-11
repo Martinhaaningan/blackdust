@@ -23,6 +23,7 @@ module.exports = function (io) {
     let userID = socket.handshake.session.passport.user;
     console.log("User with ID: " + userID + " has entered the game"); 
     let map = await game.getMap(userID);
+    
     socket.emit('connected', map, function(res) {
       console.log('client responded with: ' + res);
     });

@@ -18,25 +18,22 @@ var Loader = {
     images: {}
 };
 
-Game.initMap =  function(){
-  
-  socket.on('connected', function(map, callback){
-    console.log("A map has been served for the user.");
-    let res = 'map served succesfully';
-    callback(res);
+socket.on('connected', function(map, callback){
 
-    map  =  Game.initGrid(map);
+  console.log("A map has been served for the user.");
+  let res = 'map served succesfully';
+  callback(res);
+  Game.initMap(map);
+});
+
+Game.initMap =  function(map){
+    map = Game.initGrid(map);
     let mapSize = Game.getMapSize(map.tiles);
     map.size = mapSize;
-    
+  
     Game.setBoard(mapSize);
-    Game.render(map.tiles);
-
+    Game.render(map.tiles);   
     Game.map = map;
-
-
-    });
-
 }
 
 //bør ikke sende hele kortet og generer det forfra da det giver dublering, send den enkelte tile istedet
@@ -115,7 +112,6 @@ Game.run = function (context) {
   var p = this.load();
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
-    Game.initMap();
   }.bind(this));
 
 }
@@ -424,7 +420,6 @@ function selectCard(){
 }
     
 window.onload = function () {
-
   let context = $('board').getContext('2d');
   Game.run(context);
 
