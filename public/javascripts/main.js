@@ -6,7 +6,6 @@ const $ = function(foo) {
     return document.getElementById(foo);
 }
 const socket = io('/');
-socket.emit('hello');
 
 //the game object
 var Game = {};
@@ -21,9 +20,11 @@ var Loader = {
 
 Game.initMap =  function(){
   
-  socket.on('handshake', function(map){
+  socket.on('connected', function(map, callback){
     console.log("A map has been served for the user.");
- 
+    let res = 'map served succesfully';
+    callback(res);
+
     map  =  Game.initGrid(map);
     let mapSize = Game.getMapSize(map.tiles);
     map.size = mapSize;
@@ -32,6 +33,8 @@ Game.initMap =  function(){
     Game.render(map.tiles);
 
     Game.map = map;
+
+
     });
 
 }
