@@ -39,6 +39,7 @@ io.use(sharedsession(session, {
     autoSave:true
 })); 
 
+
 //Mongoose connection
 mongoose.connect(process.env.DB_HOST, {
         useNewUrlParser: true,
