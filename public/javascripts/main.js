@@ -18,23 +18,7 @@ var Loader = {
     images: {}
 };
 
-socket.on('connected', function(map, callback){
 
-  console.log("A map has been served for the user.");
-  let res = 'map served succesfully';
-  callback(res);
-  Game.initMap(map);
-});
-
-Game.initMap =  function(map){
-    map = Game.initGrid(map);
-    let mapSize = Game.getMapSize(map.tiles);
-    map.size = mapSize;
-  
-    Game.setBoard(mapSize);
-    Game.render(map.tiles);   
-    Game.map = map;
-}
 
 //bør ikke sende hele kortet og generer det forfra da det giver dublering, send den enkelte tile istedet
 socket.on('rolledTile', function(newTile) {
@@ -107,14 +91,7 @@ Game.load = function () {
     ];
 };
  
-Game.run = function (context) {
-  this.ctx = context;
-  var p = this.load();
-  Promise.all(p).then(function (loaded) {
-    this.tileAtlas = Loader.getImage('tiles');
-  }.bind(this));
 
-}
 
 function hexCell (x,y,z){
 this._x = x;
@@ -417,6 +394,36 @@ function selectCard(){
   let id = card.getAttribute('id');
   console.log(id);
   card.style.zIndex = 1;
+}
+
+Game.getMap =  function(onDone) {
+
+  socket.on('connected', function(map, callback){
+    console.log("A map has been served for the user.");
+    let res = 'map served succesfully';
+    callback(res);
+    onDone(map);
+    
+  });
+}
+Game.initMap =  function(map){
+    map = Game.initGrid(map);
+    let mapSize = Game.getMapSize(map.tiles);
+    map.size = mapSize;
+    Game.setBoard(mapSize);
+    Game.render(map.tiles);   
+    Game.map = map;
+}
+
+Game.run = function (context) {
+  this.ctx = context;
+  var p = this.load();
+  Promise.all(p).then(function (loaded) {
+    this.tileAtlas = Loader.getImage('tiles');
+    Game.getMap( function(map){
+      Game.initMap(map);
+    });
+  }.bind(this));
 }
     
 window.onload = function () {

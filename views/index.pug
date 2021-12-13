@@ -14,4 +14,7 @@ block content
     br
     p Please note that you will need to refresh the browser if the terrain tiles start getting cut off.
     br
+    h1 Fixes:
+    p Problem: Because tilemap is loaded asyncronously in Game.run, Map initialization and rendering was sometimes happening before it was loaded. 
+    p Fix: Map initialization improved to use callback and moved to Game.run. Things should now execute in the correct order.
     p //Martin
