@@ -16,5 +16,5 @@ block content
     br
     h1 Fixes:
     p Problem: Because tilemap is loaded asyncronously in Game.run, Map initialization and rendering was sometimes happening before it was loaded. 
-    p Fix: Map initialization improved to use callback and moved to Game.run. Things should now execute in the correct order.
+    p Fix: Map initialization improved with callback, emit event and moved to Game.run. Things should now execute in the correct order every time. 
     p //Martin

@@ -396,15 +396,15 @@ function selectCard(){
   card.style.zIndex = 1;
 }
 
-Game.getMap =  function(onDone) {
-
-  socket.on('connected', function(map, callback){
+Game.getMap =  async function(onDone) {
+  socket.emit('connected');
+  socket.on('getMap', function(map, callback){
     console.log("A map has been served for the user.");
     let res = 'map served succesfully';
     callback(res);
     onDone(map);
-    
-  });
+    });
+
 }
 Game.initMap =  function(map){
     map = Game.initGrid(map);
@@ -420,7 +420,7 @@ Game.run = function (context) {
   var p = this.load();
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
-    Game.getMap( function(map){
+    Game.getMap(function(map){
       Game.initMap(map);
     });
   }.bind(this));
