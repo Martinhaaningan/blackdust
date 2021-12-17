@@ -1,23 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'), Schema = mongoose.Schema;
 
 const map = mongoose.Schema({
 	owner: {
-		type: String
+		type: Schema.Types.ObjectId,
+		ref: "User"
 	},
 	capital: { //Navn på hovedstad
 		type: String,
 		required: true
 	},
 	region: { 
-		type: String,
-		default: null
+		type: Schema.Types.ObjectId,
+		ref: "Region",
+		default: '61bc6470af6fd03fd1fe865c'
 	},
 	created: {
 	type: Date,
 	default: Date.now
 	},
 	tiles: {
-		type: Object //array med objectIDs på alle tiles tilhørende det pågældende map
+		type: Array,
+		default: null
 	}
 
 });

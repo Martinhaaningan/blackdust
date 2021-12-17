@@ -12,9 +12,18 @@ block content
     p - 1 spell that reveals new tiles
     p - The map is persistent and will be saved to a database
     br
-    p Please note that you will need to refresh the browser if the terrain tiles start getting cut off.
-    br
-    h1 Fixes:
+    p //Martin
+
+    h1 Problems and fixes:
+    P Problem: When you draw a new tile the board is not expanded to fit the new tile on the canvas.
+    P Fix: The setBoard function is now being used to expand the canvas and svg, when the player draws a new tile. The canvas and svg is being re-rendered after this happens. RenderSVG is now checking for a tile with Id's that matches the tiles being rendered so it doesn't make duplicates. 
+    hr
+    p Problem: Both svg and canvas rendering happens in the same function, and that doesn't allow us to render separately, which will turn out to be useful later.
+    p Fix: Both types of rendering as well as calculating the position to draw at is now separate functions allowing canvas to render separately as well as making it more manageable.
+    hr
+    p Problem: Server was not using the tiles model and had all tiles added to the map collection.
+    p Fix: Tiles and maps are now separate entities. Tiles are added to maps by the server before we send the map to the client. Some variables were changed in the client because the structure was sligtly changed.
+    hr
     p Problem: Because tilemap is loaded asyncronously in Game.run, Map initialization and rendering was sometimes happening before it was loaded. 
     p Fix: Map initialization improved with callback, emit event and moved to Game.run. Things should now execute in the correct order every time. 
-    p //Martin
+    

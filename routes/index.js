@@ -6,7 +6,6 @@ const { forwardAuthenticated, ensureAuthenticated} = require('../services/auth')
 /* GET home page. */ 
 router.get('/', function(req, res, next) {
   let user = req.user ? req.user.email: null; 
-  console.log(req.user);
   res.render('index', { title: 'Express',
   user: user });
 });
@@ -26,6 +25,12 @@ module.exports = function (io) {
     
     socket.on('connected', async function(){
       let map = await game.getMap(userID);
+
+      if (map === null) {
+        await game.createMap(userID);
+        map = await game.getMap(userID);
+      }
+
       socket.emit('getMap', map, function(res) {
         console.log('client responded with: ' + res);
     });

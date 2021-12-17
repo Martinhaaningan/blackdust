@@ -1,17 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'), Schema = mongoose.Schema;
 
 const tiles = mongoose.Schema({
-	x: {
-		type: Number 
+	map: {
+		type: Schema.Types.ObjectId,
+		ref: "Map",
+		required:true
 	},
-	y: {
-		type: Number 
+	_x: {
+		type: Number,
+		required:true
 	},
-	z: {
-		type: Number
+	_y: {
+		type: Number,
+		required:true
+	},
+	_z: {
+		type: Number,
+		required:true
 	},
 	terrain: {
-		type: Number
+		type: Number,
+		required:true
 	},
 	created: {
 	type: Date,

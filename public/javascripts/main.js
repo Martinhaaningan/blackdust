@@ -23,11 +23,16 @@ var Loader = {
 //bør ikke sende hele kortet og generer det forfra da det giver dublering, send den enkelte tile istedet
 socket.on('rolledTile', function(newTile) {
   console.log('A tile has been revealed. Rendering...');
+  let newGrid = Game.makeNewNeighbors(newTile, Game.grid);
+  for (let g in newGrid) {
+    Game.grid.push(newGrid[g]);
+  }
+  Game.map.tiles.push(newTile);
+  //Vi er nødt til at udvide både svg og canvas på samme tid, ellers bliver de vist forskubbet
+  Game.setBoard(Game.map.tiles);
 
-  let newTiles = Game.makeNewNeighbors(newTile, Game.map);
-  newTiles.push(newTile);
-  console.log(newTiles);
-  Game.render(newTiles);
+  Game.renderSVG(Game.grid);
+  Game.renderCanvas(Game.map.tiles);
 });
 
 // fra https://github.com/mozdevs/gamedev-js-tiles
@@ -53,7 +58,8 @@ Loader.getImage = function (key) {
 };
 
 
-Game.setBoard = function (mapSize) {
+Game.setBoard = function (gridArray) {
+    let mapSize = Game.getMapSize(gridArray);
 
     this.board = $('board');
     this.svg = $('svg');
@@ -79,10 +85,6 @@ Game.setBoard = function (mapSize) {
     this.svg.setAttribute("height", height);
 
     Game.board.size = [width,height];
-
-
-    Game.spellsInterface(Game.spells);
-    Game.resourcesInterface(Game.resources);
 };
 
 Game.load = function () {
@@ -105,7 +107,7 @@ function tile (hexCell, terrain){
 }
 
 
-function getNeighbors(hex) {
+function getNeighbors(tile) {
   var vectors = [
     {x: 1,y: 0,z: -1}, {x: 1,y: -1,z: 0}, 
     {x: 0,y: -1,z: 1}, {x: -1,y: 0,z: 1}, 
@@ -114,50 +116,50 @@ function getNeighbors(hex) {
   let neighbors = [];
   for (let i in vectors) {
     let vector = Object.values(vectors[i]);
-    let val = Object.values(hex);
-    let neighbor = {_x: val[0] + vector[0], _y: val[1] + 
-      vector[1], _z: val[2] + vector[2]};
+    let val = Object.values(tile);
+    let neighbor = {_x: tile._x + vector[0], _y: tile._y + 
+      vector[1], _z: tile._z + vector[2]};
     neighbors.push(neighbor); 
   }
   return neighbors;
 }
 
-function checkIfExists(hex, mapTiles){
-  for (let l in mapTiles) {
-    if (mapTiles[l].hexCell._x === hex._x && mapTiles[l].hexCell._y === hex._y && mapTiles[l].hexCell._z === hex._z) {
+function checkIfExists(tile, tiles){
+
+  for (let l in tiles) {
+    if (tiles[l]._x === tile._x && tiles[l]._y === tile._y && tiles[l]._z === tile._z) {
       return true;
      }
    }
 }
 //tag kun naboer med og check på dem. Tilføj det pågældende tile bagefter
 
-Game.makeNewNeighbors = function(newTile, map){
-  let neighbors = getNeighbors(newTile.hexCell);
+Game.makeNewNeighbors = function(newTile, tiles){
+  let neighbors = getNeighbors(newTile);
   let newTiles = [];
     for (let n in neighbors) {
-      let found = checkIfExists(neighbors[n], map.tiles);
+      let found = checkIfExists(neighbors[n], tiles);
         if (!found) {
-          let terrain = null;
-          Game.map.tiles.push(new tile(neighbors[n], terrain));
-          newTiles.push(new tile(neighbors[n], terrain));
+          neighbors[n].terrain = null;
+          newTiles.push(neighbors[n]);
         }
       }
-  
   return newTiles;
 }
 
-Game.initGrid = function(map){
-  for (let t in map.tiles) {
-    let neighbors = getNeighbors(map.tiles[t].hexCell);
+Game.initGrid = function(tiles){
+
+  for (let t in tiles) {
+    let neighbors = getNeighbors(tiles[t]);
       for (let n in neighbors) {
-        let found = checkIfExists(neighbors[n], map.tiles);
+        let found = checkIfExists(neighbors[n], tiles);
         if (!found) {
-          let terrain = null;
-          map.tiles.push(new tile(neighbors[n], terrain));
+          neighbors[n].terrain = null;
+          tiles.push(neighbors[n]);
         }
       }
   }
-  return map;
+  return tiles;
 }
 
 
@@ -170,7 +172,7 @@ function tileClick() {
   if (Game.activeSpell === 4) {
     socket.emit('tileClicked', coords);
     Game.activeSpell = null;
-    console.log(Game.activeSpell);
+
     let btn = $('spellBtn4');
     btn.style.opacity = '0.8';
     btn.style.border = '1px solid #1C336A';
@@ -180,8 +182,8 @@ function tileClick() {
 Game.getMapSize = function(gridArray) {
   let size = [0,0];
   for(let t in gridArray) {
-   let y = Math.abs(gridArray[t].hexCell._y)*100/100;
-   let x = Math.abs(gridArray[t].hexCell._x)*100/100;
+   let y = Math.abs(gridArray[t]._y)*100/100;
+   let x = Math.abs(gridArray[t]._x)*100/100;
      if (y > size[1]) {
      size[1] = y;
     }
@@ -191,46 +193,31 @@ Game.getMapSize = function(gridArray) {
   return size; 
 }
 
-
-
-Game.render = function (gridArray) {
-
+Game.drawAt = function(x,y,z) {
   let edgeLength = 80;
   let edgeW = edgeLength * 3/2;
   let edgeH = edgeLength * Math.sqrt(3) / 2;
-  let x, y, z;
   
   let centerX = Game.board.size[0] /2;
   let centerY = Game.board.size[1] /2;
+    
+  let tx = x* edgeW + centerX;
+  let ty = (-y+z) * edgeH + centerY;
+  return {x: tx, y: ty, edgeLength};
+}
 
-
+Game.renderSVG = function (gridArray) {
+  let x, y, z;
   for (let i = 0; i < gridArray.length; i++) {
-    [x,y,z] = [gridArray[i].hexCell._x, gridArray[i].hexCell._y, gridArray[i].hexCell._z];
-    let terrain = gridArray[i].terrain;
+    [x,y,z] = [gridArray[i]._x, gridArray[i]._y, gridArray[i]._z];
+
+    let target = Game.drawAt(x,y,z);
+    let tile = $(x + '.' + y + '.' + z);
     
-    let tx = x* edgeW + centerX;
-    let ty = (-y+z) * edgeH + centerY;
-
-    this.ctx.moveTo(tx, ty);
-    
-    if (terrain !== null){
-      this.ctx.drawImage(
-        this.tileAtlas, //image 
-        (terrain)* 160, // source x
-        0,        //source y
-        160,      //source width
-        140,      //source heigh
-        tx -79,   //target x
-        ty -69,  //target y
-        158,      //target width
-        138       //target height
-        );
-    }
-
-
-    let tile = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+    if (tile === null) {
+    tile = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
     let coords = JSON.stringify(gridArray[i]);
-    
+
     tile.setAttribute('stroke-width','2px');
     tile.setAttribute('stroke','#1C336A');
     tile.setAttribute('fill','transparent');
@@ -239,18 +226,45 @@ Game.render = function (gridArray) {
     tile.setAttribute('opacity','0.7');
     tile.setAttribute('coords', coords);
     tile.addEventListener('mouseup', tileClick);
+    let svg = $('svg');
+    svg.appendChild(tile);
+    }
 
     let points = '';
     for (let j = 1; j <= 6; j++) {
-      let x = tx + Math.cos(j / 6 * (Math.PI *2)) *edgeLength;
-      let y = ty + Math.sin(j / 6 * (Math.PI *2)) *edgeLength;
+      let x = target.x + Math.cos(j / 6 * (Math.PI *2)) *target.edgeLength;
+      let y = target.y + Math.sin(j / 6 * (Math.PI *2)) *target.edgeLength;
       points += ' '+x+','+y+' ';
     }
     tile.setAttribute('points', points);
-    let svg = $('svg');
-
-    svg.appendChild(tile);
     
+  }
+}
+//Når vi skal lave rendering for bygninger osv. kan vi bruge den sammen funktion. 
+//Det eneste der ikke er det samme er hvilket atlas der skal bruges, så det kan bruges som parameter
+// F.eks: (gridArray, type, src)
+Game.renderCanvas = function (gridArray) {
+  let x, y, z;
+  for (let i = 0; i < gridArray.length; i++) {
+    [x,y,z] = [gridArray[i]._x, gridArray[i]._y, gridArray[i]._z];
+    let terrain = gridArray[i].terrain;
+    let target = Game.drawAt(x,y,z);
+
+    this.ctx.moveTo(target.x, target.y);
+    
+    if (terrain !== null){
+      this.ctx.drawImage(
+        this.tileAtlas, //image 
+        (terrain)* 160, // source x
+        0,        //source y
+        160,      //source width
+        140,      //source heigh
+        target.x -79,   //target x
+        target.y -69,  //target y
+        158,      //target width
+        138       //target height
+        );
+    }
   }
 
 };
@@ -353,9 +367,8 @@ Game.spellsInterface = function (spells) {
     activateBtn.style.opacity = '0.8';
 
     activateBtn.addEventListener('click', function(){
-      console.log('clicked button');
       Game.activeSpell = 4;
-      console.log(Game.activeSpell);
+
       activateBtn.style.opacity = '1';
       activateBtn.style.border = '1px solid #ece271';
     });
@@ -407,11 +420,11 @@ Game.getMap =  async function(onDone) {
 
 }
 Game.initMap =  function(map){
-    map = Game.initGrid(map);
-    let mapSize = Game.getMapSize(map.tiles);
-    map.size = mapSize;
-    Game.setBoard(mapSize);
-    Game.render(map.tiles);   
+    let grid = Game.initGrid(map.tiles);
+    Game.grid = grid;
+    Game.setBoard(map.tiles);
+    Game.renderSVG(grid);
+    Game.renderCanvas(map.tiles);   
     Game.map = map;
 }
 
@@ -421,8 +434,11 @@ Game.run = function (context) {
   Promise.all(p).then(function (loaded) {
     this.tileAtlas = Loader.getImage('tiles');
     Game.getMap(function(map){
+
       Game.initMap(map);
     });
+    Game.spellsInterface(Game.spells);
+    Game.resourcesInterface(Game.resources);
   }.bind(this));
 }
     
