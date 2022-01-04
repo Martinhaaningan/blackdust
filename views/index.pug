@@ -13,7 +13,9 @@ block content
     p - The map is persistent and will be saved to a database
     br
     p //Martin
-
+    h1 New features:
+    p maplocation has been implemented. This defines a regional set of coordinates which establishes a relationship between players maps. This allows players to find eachother in the gameworld.
+    hr
     h1 Problems and fixes:
     P Problem: When you draw a new tile the board is not expanded to fit the new tile on the canvas.
     P Fix: The setBoard function is now being used to expand the canvas and svg, when the player draws a new tile. The canvas and svg is being re-rendered after this happens. RenderSVG is now checking for a tile with Id's that matches the tiles being rendered so it doesn't make duplicates. 

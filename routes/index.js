@@ -25,15 +25,16 @@ module.exports = function (io) {
     
     socket.on('connected', async function(){
       let map = await game.getMap(userID);
-
+      
       if (map === null) {
         await game.createMap(userID);
         map = await game.getMap(userID);
       }
+      await game.addToRegion(userID);
 
       socket.emit('getMap', map, function(res) {
         console.log('client responded with: ' + res);
-    });
+      });
 
     });
 
@@ -43,6 +44,7 @@ module.exports = function (io) {
 
       let userID = socket.handshake.session.passport.user;
       let newTile = await game.rollNewTile(userID, coords);
+
       socket.emit('rolledTile', newTile);
     });
 });

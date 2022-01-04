@@ -1,6 +1,10 @@
 const mongoose = require('mongoose'), Schema = mongoose.Schema;
 
 const tiles = mongoose.Schema({
+	sharedBy: {
+		type: Array,
+		default: []
+	},
 	map: {
 		type: Schema.Types.ObjectId,
 		ref: "Map",
