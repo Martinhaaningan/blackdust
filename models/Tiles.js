@@ -1,14 +1,14 @@
 const mongoose = require('mongoose'), Schema = mongoose.Schema;
 
 const tiles = mongoose.Schema({
-	sharedBy: {
-		type: Array,
-		default: []
-	},
 	map: {
 		type: Schema.Types.ObjectId,
 		ref: "Map",
 		required:true
+	},
+	owner: {
+		type: String,
+		default: null
 	},
 	_x: {
 		type: Number,
@@ -24,7 +24,12 @@ const tiles = mongoose.Schema({
 	},
 	terrain: {
 		type: Number,
-		required:true
+		required:true,
+		default: null
+	},	
+	sharedBy: {
+		type: Array,
+		default: []
 	},
 	created: {
 	type: Date,

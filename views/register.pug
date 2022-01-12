@@ -3,7 +3,9 @@ extends layout
 block content
 	section
 		form(method='post' action='/users/register' enctype='multipart/form-data' )
+			input(type='name' minlength='4' name='name' required placeholder='name')
 			input(type='email' minlength='6' name='email' required placeholder='Email')
+
 			input(type='password' minlength='6' name='password' required placeholder='Password')
 			input(type='password' minlength='6' name='passwordr' required placeholder='Repeat Password')
 			input(type='submit' value='Sign up')

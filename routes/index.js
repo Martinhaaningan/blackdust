@@ -22,17 +22,15 @@ module.exports = function (io) {
     let userID = socket.handshake.session.passport.user;
     console.log("User with ID: " + userID + " has entered the game"); 
     
-    
     socket.on('connected', async function(){
       let map = await game.getMap(userID);
-      
+      let user = await game.getUser(userID);  
       if (map === null) {
         await game.createMap(userID);
         map = await game.getMap(userID);
       }
       await game.addToRegion(userID);
-
-      socket.emit('getMap', map, function(res) {
+      socket.emit('getMap', map, user.name, function(res) {
         console.log('client responded with: ' + res);
       });
 
@@ -46,6 +44,10 @@ module.exports = function (io) {
       let newTile = await game.rollNewTile(userID, coords);
 
       socket.emit('rolledTile', newTile);
+    });
+
+    socket.on('message', function(msg) {
+      io.emit('message', msg);
     });
 });
 

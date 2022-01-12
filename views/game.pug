@@ -7,8 +7,15 @@ html
     script(defer src="/javascripts/panzoom.js" charset="UTF-8" type="text/javascript" )
   body#body
     #main-wrapper
-      canvas#board
-      svg#svg
+      canvas#board.panzoom-exclude
+      svg#svg.panzoom-exclude
+        defs
+          radialGradient#green(cx="50%" cy="50%" r="50%" fx="50%" fy="50%")
+            stop(offset="50%" style="stop-color:rgb(0,0,0, 0.0);stop-opacity:0")
+            stop(offset="100%" style="stop-color:rgb(0,255,0);stop-opacity:0.4")
+          radialGradient#blue(cx="50%" cy="50%" r="50%" fx="50%" fy="50%")
+            stop(offset="50%" style="stop-color:rgb(0,0,0, 0.0);stop-opacity:0")
+            stop(offset="100%" style="stop-color:rgb(40,70,255);stop-opacity:0.6")
     #ui-wrapper
       #spells-ui
       #resources-ui

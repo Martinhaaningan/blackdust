@@ -17,8 +17,6 @@ function roll(s) {
 	return Math.floor(Math.random()*s);
 }
 
-//Vi kan køre initGrid i backenden, gemme det grid array i databasen og sende gridArray via socketIO
-
 function createGrid (mapSize){
   mapSize = Math.max(1,mapSize);
   let gridArray = [];
@@ -50,6 +48,20 @@ function getLocal (location, tile){
 	let localz = (location._z - tile._z) * -1;
 	return {_x: localx, _y: localy, _z: localz}
 }
+//This is witchcraft! Source: https://stackoverflow.com/questions/43011742/how-to-omit-specific-properties-from-an-object-in-javascript/43011802
+function sanitizeTiles (tiles) {
+	let cleanTiles = [];
+	let filter = ({_x, _y, _z, terrain, owner}) => ({_x, _y, _z, terrain, owner})
+	for (let t in tiles) {
+		let filtered = filter(tiles[t]);
+		cleanTiles.push(filtered);
+	}
+	return cleanTiles;
+}
+exports.getUser = async function(Id) {
+	let user = await userModel.findById(Id);
+	return {name: user.name};
+}
 
 exports.getMap = async function(Id) {
 	let map;
@@ -58,19 +70,27 @@ exports.getMap = async function(Id) {
 		
 		//get tile, add to map
 		if (map !== null) {
-			let localTiles = await tileModel.find({map: map._id});
+			let localTiles = await tileModel.find({map: map._id}, {});
 			let sharedTiles = await tileModel.find({sharedBy: [map._id]});
 
+			//for sharedTiles: because the coordinates are local to their map, 
+				//we need to replace the coordinates for each sharedtile
+				//with coordinates that are local to the map that we are getting
+
 			for (let t in sharedTiles){
-				let sharedMap = await mapModel.findOne({map: sharedTiles[t].map._id});
-				let regional = getRegional(sharedMap, sharedTiles[t]);
+				let sharedMap = await mapModel.findOne({_id: sharedTiles[t].map._id});
+
+				let regional = getRegional(sharedMap.location, sharedTiles[t]);
 				let local = getLocal(map.location, regional);
 				sharedTiles[t]._x = local._x;
 				sharedTiles[t]._y = local._y;
 				sharedTiles[t]._z = local._z;
 			}
-			let tiles = []; 
-			map.tiles = tiles.concat(localTiles, sharedTiles);
+			let tiles = [];
+			tiles = tiles.concat(localTiles, sharedTiles);
+			tiles = sanitizeTiles(tiles);
+
+			map.tiles = tiles;
 			}
 		} catch (err){
 			console.log(err);
@@ -81,6 +101,7 @@ exports.getMap = async function(Id) {
 
 exports.createMap = async function (Id) {
 		console.log("No map was found for the user. A new map is being generated.");
+		let user = await userModel.findById({_id: Id});
 		let map = new mapModel({
 			owner: Id,
 			capital: "my base"
@@ -99,7 +120,8 @@ exports.createMap = async function (Id) {
 			_x: grid[t]._x,
 			_y: grid[t]._y,
 			_z: grid[t]._z,
-			terrain: roll(4) +1
+			terrain: roll(4) +1,
+			owner: user.name
 			});
 			await tile.save();
 		}
@@ -145,6 +167,8 @@ exports.rollNewTile = async function(Id, coords) {
 			sharedTile._x = newLocal._x;
 			sharedTile._y = newLocal._y;
 			sharedTile._z = newLocal._z;
+
+			//sharedTile = sanitizeTiles(sharedTile);
 			return sharedTile;
 		}
 	}

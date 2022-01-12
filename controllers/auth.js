@@ -11,10 +11,10 @@ exports.postRegister = async function (req, res, next) {
     form.parse(req, async function(err, fields, files) {
         if (err) {console.error(err);}
 
-	    let {email, password, passwordr } = fields;
+	    let {name, email, password, passwordr } = fields;
 	    let errors = [];
 
-	    if (!email || !password || !passwordr) {
+	    if (!name || !email || !password || !passwordr) {
 	        errors.push({ msg: 'Please enter all fields' });
 	    }
 
@@ -26,21 +26,23 @@ exports.postRegister = async function (req, res, next) {
 	        errors.push({ msg: 'Password must be at least 6 characters' });
 	    }
 
-	    let userExists = await userModel.exists({email: email});
+	    let userExists = await userModel.exists({$or: [{email: email}, {name: name}]});
 
 	    if (userExists) {
-	    	errors.push({ msg: 'This email is not allowed' });
+	    	errors.push({ msg: 'The name or email is already claimed' });
 	    } 
 
 	    if (errors.length > 0) {
 	        res.render('register', {
 	            errors,
+	            name,
 	            email,
 	            password,
 	            passwordr
 	        });
 	    } else {
 			const newUser = new userModel({
+				name,
 				email,
 				password
 			});
