@@ -80,6 +80,22 @@ a {
   left: 0;
 }
 
+#spells-ui {
+  top:  50px;
+  position: fixed;
+  right: 260px;
+}
+
+#resources-ui {
+  background-color: #2a2938;
+  position: fixed;
+  width: 100%;
+  height: 50px;
+  margin:  0;
+  top: 0;
+  left: 0;
+}
+
 header p {
   color: white;
   margin: 10px;
