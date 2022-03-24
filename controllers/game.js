@@ -120,7 +120,7 @@ exports.createMap = async function (Id) {
 			_x: grid[t]._x,
 			_y: grid[t]._y,
 			_z: grid[t]._z,
-			terrain: roll(4) +1,
+			terrain: roll(3),
 			owner: user.name
 			});
 			await tile.save();
@@ -185,7 +185,7 @@ exports.rollNewTile = async function(Id, coords) {
 			_x: tile._x,
 			_y: tile._y,
 			_z: tile._z,
-			terrain: roll(4) +1
+			terrain: roll(5)
 			});
 		await newTile.save();
 		return newTile;

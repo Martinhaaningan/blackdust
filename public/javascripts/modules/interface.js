@@ -1,4 +1,6 @@
 import {$, drawAt} from './common.js';
+import {Events} from './events.js';
+import {Game} from '../main.js';
 
 let Interface = {}
 let activeSpell;
@@ -56,7 +58,6 @@ Interface.openChat = function (){
     messages.style.color = 'white';
     messages.setAttribute('id', 'messages');
     
-    
     chat.appendChild(input);
     chat.appendChild(btn);
     chatFrame.appendChild(messages);
@@ -72,7 +73,7 @@ Interface.openChat = function (){
   } 
 };
 
-Interface.tileInfo = function (data){
+Interface.tileInfo = function (tile){
   let wrap = $('main-wrapper');
   let string = tile.getAttribute('coords');
   let coords = JSON.parse(string);
@@ -118,14 +119,14 @@ Interface.spellsInterface = function (spells, user) {
 
   let spellsUi = $('spells-ui');
 
-  for (let i in spells) {
+
 
     let spellCard = document.createElement('div');
-    spellCard.setAttribute('id', i);
+
     spellCard.setAttribute('class', 'spellCard');
     spellCard.style.height = '200px';
     spellCard.style.width = '130px';
-    spellCard.style.top = 50 + 50 * i + 'px';
+    spellCard.style.top = 100 + 'px';
     spellCard.style.left = '100px';
     spellCard.style.backgroundColor = '#2a2938';
     spellCard.style.border = '5px solid black';
@@ -142,7 +143,7 @@ Interface.spellsInterface = function (spells, user) {
     });
 
     let label = document.createElement('p');
-    label.innerHTML = spells[i];
+    label.innerHTML = spells[0];
     spellCard.appendChild(label);
 
     let img = document.createElement('IMG');
@@ -158,7 +159,7 @@ Interface.spellsInterface = function (spells, user) {
     let activateBtn = document.createElement('button');
     let text = document.createTextNode("Cast");
     activateBtn.setAttribute('class','button');
-    activateBtn.setAttribute('id','spellBtn' + i);
+    activateBtn.setAttribute('id','spellBtn');
     activateBtn.style.height = '30px';
     activateBtn.style.width = '80%';
     activateBtn.style.color = '#ece271';
@@ -171,20 +172,45 @@ Interface.spellsInterface = function (spells, user) {
     activateBtn.addEventListener('click', function(){
       activateBtn.style.opacity = '1';
       activateBtn.style.border = '1px solid #ece271';
+
       let tiles = document.getElementsByClassName('blank');
       //Note: when it's a nodelist you must use this loop,
-      //and not (let t in tiles) which throws errors 
+      //and not (let t in tiles) which throws errors
       for (let t = 0; t < tiles.length; t++) {
         tiles[t].setAttribute('stroke','#ece271');
-        tiles[t].style.opacity = '1';
+        tiles[t].style.opacity = '0.6';
+        tiles[t].addEventListener('click', Interface.revealTile, true);
       }
     });
-
     activateBtn.appendChild(text);
     spellCard.appendChild(activateBtn);
     spellsUi.appendChild(spellCard);
-    }
 };
+
+
+Interface.revealTile = function(event){
+  event.stopPropagation();
+  let tile = event.target || event.srcElement;
+  let coords = tile.getAttribute('coords');
+  console.log("hit! on tile: " + coords);
+  let btn = $('spellBtn');
+  btn.style.opacity = '0.8';
+  btn.style.border = '1px solid #1C336A';
+
+  Events.tileRequest(coords);
+  Events.tileResult(function(newTile){
+    Game.prepareTile(newTile);
+  });
+  
+  let tiles = document.getElementsByClassName('blank');
+    //Note: when it's a nodelist you must use this loop,
+      //and not (let t in tiles) which throws errors
+  for (let t= 0; t < tiles.length; t++) {
+    tiles[t].setAttribute('stroke','#1C336A');
+    tiles[t].removeEventListener('click', Interface.revealTile, true);
+  }
+  
+}
 
 Interface.resourcesInterface = function(resources){
   let resUi = $('resources-ui');
@@ -217,7 +243,7 @@ Interface.borders = function () {
   svg.appendChild(green);
 };
 
-Interface.renderSVG = function (tile, user, spells, x, y, clickEvent) {
+Interface.renderSVG = function (tile, user, target) {
 
   let svg = $('svg');
   let wrap = $('main-wrapper');
@@ -229,33 +255,34 @@ Interface.renderSVG = function (tile, user, spells, x, y, clickEvent) {
 
   let points = '';
   for (let j = 1; j <= 6; j++) {
-    let pointX = x + Math.cos(j / 6 * (Math.PI *2)) * 80;
-    let pointY = y + Math.sin(j / 6 * (Math.PI *2)) * 80;
+    let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 80;
+    let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 80;
     points += ' '+pointX+','+pointY+' ';
   }
 
   let hex = $(tile._x + '.' + tile._y + '.' + tile._z);
   if (hex === null) {
-      
     hex = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
 
     let coords = JSON.stringify(tile);
-
     hex.setAttribute('owner', owner);
     hex.setAttribute('stroke-width','2px');
     hex.setAttribute('stroke','#1C336A');
     hex.setAttribute('fill','transparent');
     hex.setAttribute("id", tile._x + '.' + tile._y + '.' + tile._z);
     hex.setAttribute('class','tile');
-    hex.setAttribute('opacity','0.7');
+    hex.setAttribute('opacity','0.6');
     hex.setAttribute('coords', coords);
-    hex.style.zIndex = 1;
-    hex.addEventListener('click', function (event) {
-      clickEvent(event);
-    }, false);
 
+    hex.addEventListener('mouseenter', function(){
+      hex.setAttribute('stroke','#495B87');
+      hex.setAttribute('opacity','1');
+    });
+    hex.addEventListener('mouseleave', function(){
+      hex.setAttribute('stroke','#1C336A');
+      hex.setAttribute('opacity','0.6');
+    });
     if (tile.terrain === null) {
-      hex.style.zIndex = 3;
       hex.setAttribute('class','blank');
       hex.setAttribute('fill','black');
     }  
@@ -278,7 +305,6 @@ Interface.renderSVG = function (tile, user, spells, x, y, clickEvent) {
     hex.setAttribute('owner', owner);
     hex.setAttribute('points', points); 
     svg.appendChild(hex);
-
 };
 
 export {Interface};

@@ -11,7 +11,7 @@ html
           p Please login or go register.
           input#uid(type='text' name='uid' required placeholder="Email")
           input(type='password' name='password' minlength='6' required placeholder="Password")
-          input(type='submit' value='Log in')
+          button.button(type='submit') Login
           if errors != undefined && errors.length != 0
             each error in errors
               div.error-msg(role='alert' id='a1') #{error.msg}
@@ -23,16 +23,14 @@ html
             div.error-msg(role='alert' id='a4') #{error}
       nav
         ul
-          li
-              a(href='/') Home
-          li
-              a(href='/news') News
           if !user
             li
               a(href='/users/register') Register
           if user
             li
               a(href='/game') Enter the game
+            li
+              a(href='/news') News
             li
               a(href='/users/logout') Log out
     block content

@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  .wrapper
+    section
+      .content#news
+        h1 Introduction
+        p This is the very early alpha version of Black Dust. A browser strategy game that I developed as the product for my bachelors project.
+        p The game currently features:
+        p - Basic user interface
+        p - Hexagonal map with terrain tiles
+        p - 1 spell that reveals new tiles
+        p - It's Multiplayer
+        p The game supports as many players as the hardware allows. (on Heroku that's not many)
+        p There is not a lot to do yet. :)
+        hr
+        h1 Working on structure. 
+        p.date 23/3 2022
+        p The work continues at a slow burn. I made a new tileAtlas that looks better. 
+        p The big hurdle right now is that the client has grown too large for a single javascript file. I have not been using modules and that has come back to haunt me. It's a real mess and I am working on segmenting the client into separate modules.
+        p I've also made the landing page a lot nicer to look at.
+        p //Martin
+        hr
+        h1 New build is live. 
+        p.date 21/1 2022
+        p Regional location has been implemented as part of player maps. This defines a regional set of coordinates which establishes a relationship between players maps. This allows players to find eachother in the gameworld.
+        p The game will now roll a regional set of coordinates on entry, that are used as a key to translate between the players maps. The regional coordinates are tested to see if the coordinates are valid because the tiles of each map cannot be allowed to overlap.
+        p I also passed my exam with flying colors and I will continue to work on the project on a past time basis.
+        p //Martin
+        hr
+        h1 We are live!
+        p.date 8/12 2021
+        p The game is live on heroku.
+        p //Martin
+  .fade
+
+
+    

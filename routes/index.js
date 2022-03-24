@@ -10,6 +10,12 @@ router.get('/', function(req, res, next) {
   user: user });
 });
 
+router.get('/news', function(req, res, next) {
+  let user = req.user ? req.user.email: null; 
+  res.render('news', { title: 'Express',
+  user: user });
+});
+
 router.get('/game', ensureAuthenticated, function(req, res, next) {
   let user = req.user ? req.user.email: null; 
   res.render('game', 
