@@ -4,7 +4,7 @@ import {Renderer} from './modules/renderer.js';
 import {Interface} from './modules/interface.js';
 import {Events} from './modules/events.js';
 import {$, drawAt} from './modules/common.js';
-
+import {Animations} from './modules/animations.js';
 var Game = {};
 
 let svg = $('svg');
@@ -45,7 +45,7 @@ Game.update = function () {
       Renderer.drawCanvas(Game.ctx, Game.map.tiles[i].terrain, Game.tileAtlas, target);
     }
     if (Game.map.tiles[i].terrain === null) {
-      Renderer.drawCanvas(Game.ctx, 0, Game.dust, target);
+      Animations.dust(Game.ctx, target, Game.dust);
     }
   }
 }

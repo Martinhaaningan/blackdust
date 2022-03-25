@@ -64,7 +64,7 @@ exports.postRegister = async function (req, res, next) {
 exports.postLogin = async function (req, res, next) {
     let user = await userModel.findOne({email: req.body.email});
     passport.authenticate('local', {
-        successRedirect: '/', 
+        successRedirect: '/news', 
         failureRedirect: '/',
         failureFlash: true
     })(req, res, next); 

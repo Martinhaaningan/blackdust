@@ -20,7 +20,6 @@ Interface.openChat = function (){
     chatFrame.style.bottom = '20px';
     let chat = document.createElement('form');
     chat.setAttribute('action', "");
-
     chat.setAttribute('id','chat');
     chat.style.position = 'absolute';
     chat.style.bottom = '0';
@@ -34,7 +33,6 @@ Interface.openChat = function (){
     btn.style.margin = '0';
     btn.style.width = '50px';
     btn.style.height = '50px';
-
     let exit = document.createElement('button');
     exit.style.width = "20px";
     exit.style.height = "20px";
@@ -57,19 +55,17 @@ Interface.openChat = function (){
     let messages = document.createElement('div');
     messages.style.color = 'white';
     messages.setAttribute('id', 'messages');
-    
     chat.appendChild(input);
     chat.appendChild(btn);
     chatFrame.appendChild(messages);
     chatFrame.appendChild(chat);
     btn.innerHTML = 'Send';
     wrap.appendChild(chatFrame);
-
     let mainWrap = $('main-wrapper');
     let info = $('tileInfo');
     if (info !== null){
     mainWrap.removeChild(info);
-  }
+    }
   } 
 };
 
@@ -77,12 +73,10 @@ Interface.tileInfo = function (tile){
   let wrap = $('main-wrapper');
   let string = tile.getAttribute('coords');
   let coords = JSON.parse(string);
-
   let info = $('tileInfo');
   if (info !== null){
   wrap.removeChild(info);
   }
-
   info = document.createElement("div");
   info.setAttribute('id','tileInfo');
   let text = document.createTextNode("Tile info");
@@ -111,18 +105,12 @@ Interface.tileInfo = function (tile){
     convoBTN.appendChild(text);
     info.appendChild(convoBTN);
   }
-
   wrap.appendChild(info);
 };
 
 Interface.spellsInterface = function (spells, user) {
-
   let spellsUi = $('spells-ui');
-
-
-
     let spellCard = document.createElement('div');
-
     spellCard.setAttribute('class', 'spellCard');
     spellCard.style.height = '200px';
     spellCard.style.width = '130px';
@@ -168,11 +156,9 @@ Interface.spellsInterface = function (spells, user) {
     activateBtn.style.marginLeft = '12px';
     activateBtn.style.marginTop = '7px';
     activateBtn.style.opacity = '0.8';
-
     activateBtn.addEventListener('click', function(){
       activateBtn.style.opacity = '1';
       activateBtn.style.border = '1px solid #ece271';
-
       let tiles = document.getElementsByClassName('blank');
       //Note: when it's a nodelist you must use this loop,
       //and not (let t in tiles) which throws errors
@@ -187,7 +173,6 @@ Interface.spellsInterface = function (spells, user) {
     spellsUi.appendChild(spellCard);
 };
 
-
 Interface.revealTile = function(event){
   event.stopPropagation();
   let tile = event.target || event.srcElement;
@@ -196,12 +181,10 @@ Interface.revealTile = function(event){
   let btn = $('spellBtn');
   btn.style.opacity = '0.8';
   btn.style.border = '1px solid #1C336A';
-
   Events.tileRequest(coords);
   Events.tileResult(function(newTile){
     Game.prepareTile(newTile);
   });
-  
   let tiles = document.getElementsByClassName('blank');
     //Note: when it's a nodelist you must use this loop,
       //and not (let t in tiles) which throws errors
@@ -209,7 +192,6 @@ Interface.revealTile = function(event){
     tiles[t].setAttribute('stroke','#1C336A');
     tiles[t].removeEventListener('click', Interface.revealTile, true);
   }
-  
 }
 
 Interface.resourcesInterface = function(resources){
@@ -219,7 +201,6 @@ Interface.resourcesInterface = function(resources){
   let resKeys = Object.keys(resources);
   let resVals = Object.values(resources);
   for (let r in resKeys) {
-
     let p = document.createElement('p');
     p.innerHTML = resKeys[r] + ': ' + resVals[r];
     p.style.float = 'left';
@@ -244,26 +225,21 @@ Interface.borders = function () {
 };
 
 Interface.renderSVG = function (tile, user, target) {
-
   let svg = $('svg');
   let wrap = $('main-wrapper');
   let owner = null;
-
   if(tile.owner !== undefined) {
     owner = tile.owner;
   }
-
   let points = '';
   for (let j = 1; j <= 6; j++) {
     let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 80;
     let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 80;
     points += ' '+pointX+','+pointY+' ';
   }
-
   let hex = $(tile._x + '.' + tile._y + '.' + tile._z);
   if (hex === null) {
     hex = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
-
     let coords = JSON.stringify(tile);
     hex.setAttribute('owner', owner);
     hex.setAttribute('stroke-width','2px');
@@ -273,7 +249,6 @@ Interface.renderSVG = function (tile, user, target) {
     hex.setAttribute('class','tile');
     hex.setAttribute('opacity','0.6');
     hex.setAttribute('coords', coords);
-
     hex.addEventListener('mouseenter', function(){
       hex.setAttribute('stroke','#495B87');
       hex.setAttribute('opacity','1');
