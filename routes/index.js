@@ -5,21 +5,21 @@ const { forwardAuthenticated, ensureAuthenticated} = require('../services/auth')
 
 /* GET home page. */ 
 router.get('/', function(req, res, next) {
-  let user = req.user ? req.user.email: null; 
+  let user = req.user ? req.user.email: null;
   res.render('index', { title: 'Express',
-  user: user });
+  user: user});
 });
 
 router.get('/news', function(req, res, next) {
   let user = req.user ? req.user.email: null; 
   res.render('news', { title: 'Express',
-  user: user });
+  user: user});
 });
 
 router.get('/game', ensureAuthenticated, function(req, res, next) {
   let user = req.user ? req.user.email: null; 
   res.render('game', 
-  {user: user });
+  {user: user});
 });
 
 module.exports = function (io) {

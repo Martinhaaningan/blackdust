@@ -8,6 +8,17 @@ body {
   margin: 0;
   background-image: url(../images/bg.PNG);
   background-color: #2a2938;
+  height: 100%;
+  width: 100%;
+  
+}
+
+.newTile {
+opacity: 1
+-webkit-animation: fade 5s;
+animation: fade 5s;
+-moz-animation: fade 5s;
+-o-animation: fade 5s;
 }
 
 #body {
@@ -112,12 +123,17 @@ li {
 }
 
 #svg{
+
+
   position: absolute;
   top: 0;
   left: 0;
   z-index: 3;
   overflow: visible;
 
+}
+polygon:hover {
+  stroke: rgb(102,153,255, 1);
 }
 
 #ui-wrapper {

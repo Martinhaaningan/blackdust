@@ -5,20 +5,24 @@ import {Interface} from './modules/interface.js';
 import {Events} from './modules/events.js';
 import {$, drawAt} from './modules/common.js';
 import {Animations} from './modules/animations.js';
-var Game = {};
-
-let svg = $('svg');
-svg.addEventListener('click', function(event){
-  if (event.target !== event.currentTarget) {
-    return};
-    let wrap = $('main-wrapper');
-    let info = $('tileInfo');
-    if (info !== null){
-    wrap.removeChild(info);
-  }
-});
 
 //the game object
+let Game = {};
+Game.initAnimations = [];
+
+// let svg = $('svg');
+// svg.addEventListener('click', function(event){
+//   if (event.target !== event.currentTarget) {
+//     return};
+//     let wrap = $('main-wrapper');
+//     let info = $('tileInfo');
+//     if (info !== null){
+//     wrap.removeChild(info);
+//   }
+// });
+
+
+
 
 Game.spells = ["Tether flare"];
 Game.spells.activeSpell = null;
@@ -32,13 +36,20 @@ Game.load = function () {
     ];
 };
 Game.animate = function () {
-  setInterval(function(){
-    Game.update();
-  }, 1000/30);
+  requestAnimationFrame(Game.animate);
+  Game.ctx.clearRect(0,0,Game.board.size[0],Game.board.size[1]);
+  Game.update();
 };
 
 Game.update = function () {
-  Game.ctx.clearRect(0,0,Game.board.size[0],Game.board.size[1]);
+  
+  for (let i in Game.initAnimations) {
+    const current = Game.initAnimations[i];
+    current();
+  }
+}
+
+Game.animateBoard = function(){
   for (let i in Game.map.tiles) {
     let target = drawAt(Game.map.tiles[i]._x, Game.map.tiles[i]._y, Game.map.tiles[i]._z, Game.board.size);
     if (Game.map.tiles[i].terrain !== null) {
@@ -77,6 +88,7 @@ Game.setBoard = function (gridArray) {
     this.svg.setAttribute("height", height);
 
     Game.board.size = [width,height];
+
 };
 
 function getNeighbors(tile) {
@@ -169,34 +181,42 @@ Game.prepareTile = function(newTile){
      }
    }
   //når vi tilføjer den nye tile er der stadig en tile med samme coords og null terrain
+  let coords = JSON.stringify(newTile);
   let SVGtile = $(newTile._x + '.' + newTile._y + '.' + newTile._z);
-  SVGtile.setAttribute('class', "tile");
+  SVGtile.setAttribute('class', "newTile");
+  SVGtile.setAttribute('owner', newTile.owner);
+  SVGtile.setAttribute('coords', coords);
   let newGrid = Game.makeNewNeighbors(newTile, Game.map.tiles);
-  Game.map.tiles.push(newTile);
+
   for (let g in newGrid) {
      Game.map.tiles.push(newGrid[g]);
   }
   Game.setBoard(Game.map.tiles);
-  //Vi er nødt til at udvide både svg og canvas på samme tid, ellers bliver de vist forskubbet
-  for (let t in Game.grid) {
+
+  for (let t in Game.map.tiles) {
     let target = drawAt(Game.map.tiles[t]._x, Game.map.tiles[t]._y, Game.map.tiles[t]._z, Game.board.size);
     Interface.renderSVG(Game.map.tiles[t], Game.user, target);
   }
-  let target = drawAt(newTile._x, newTile._y, newTile._z, Game.board.size);
-  Interface.renderSVG(newTile, Game.user, target);
+  // let target = drawAt(newTile._x, newTile._y, newTile._z, Game.board.size);
+  // Interface.renderSVG(newTile, Game.user, target);
 }
 
 
 
 Game.initMap = function(map){
-    let grid = initGrid(map.tiles);
-    Game.grid = grid;
-    Game.setBoard(map.tiles);
+  Game.map.tiles = initGrid(map.tiles);
+  Game.setBoard(Game.map.tiles);
+  for (let i = 0; i < Game.map.tiles.length; i++) {
+    let target = drawAt(Game.map.tiles[i]._x, Game.map.tiles[i]._y, Game.map.tiles[i]._z, Game.board.size);
+    Interface.renderSVG(Game.map.tiles[i], Game.user, target);
+  }
 
-    for (let i = 0; i < grid.length; i++) {
-      let target = drawAt(grid[i]._x, grid[i]._y, grid[i]._z, Game.board.size);
-      Interface.renderSVG(grid[i], Game.user, target);
-    }
+  let body = $('body');
+  let canvas = $('board');
+
+  let width = canvas.width /2 - (body.clientWidth /2);
+  let height = canvas.height /2 - 400;
+  window.scrollTo(width, height);
 };
 
 Game.run = function (context) {
@@ -208,12 +228,16 @@ Game.run = function (context) {
     Game.tileAtlas = Loader.getImage('tiles');
     Game.buildingsAtlas = Loader.getImage('buildings');
     Game.dust = Loader.getImage('dust');
+
+
     
     Events.getMap(function(map, user){
       Game.map = map;
       Game.user = user;
       Game.initMap(map);
-      Game.animate();
+      Game.animate(Game.update);
+      Game.initAnimations.push(Game.animateBoard);
+
       Interface.spellsInterface(Game.spells, Game.user);
       Interface.resourcesInterface(Game.resources);
       }.bind(this));
@@ -226,8 +250,14 @@ window.onload = function () {
   let context = $('board').getContext('2d');
   Game.run(context);
 
+
   let wrapper = $('main-wrapper');
+  
   panzoom(wrapper);
+
+
+  
 };
+
 
 export {Game}

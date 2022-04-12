@@ -167,7 +167,7 @@ exports.rollNewTile = async function(Id, coords) {
 			sharedTile._x = newLocal._x;
 			sharedTile._y = newLocal._y;
 			sharedTile._z = newLocal._z;
-
+			//SharedTile should be sanitized
 			//sharedTile = sanitizeTiles(sharedTile);
 			return sharedTile;
 		}

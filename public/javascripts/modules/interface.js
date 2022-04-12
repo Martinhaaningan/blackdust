@@ -1,7 +1,7 @@
 import {$, drawAt} from './common.js';
 import {Events} from './events.js';
 import {Game} from '../main.js';
-
+import {Animations} from './animations.js';
 let Interface = {}
 let activeSpell;
 
@@ -70,41 +70,47 @@ Interface.openChat = function (){
 };
 
 Interface.tileInfo = function (tile){
-  let wrap = $('main-wrapper');
-  let string = tile.getAttribute('coords');
-  let coords = JSON.parse(string);
-  let info = $('tileInfo');
-  if (info !== null){
-  wrap.removeChild(info);
-  }
-  info = document.createElement("div");
+  let wrap = $('ui-wrapper');
+
+  let info = document.createElement("div");
   info.setAttribute('id','tileInfo');
-  let text = document.createTextNode("Tile info");
+
+  let img = document.createElement('IMG');
+  img.setAttribute('src', '/images/forest.png');
+  img.setAttribute('width', '100%');
+
+  let h2 = document.createElement("h2");
+  let h2text = document.createTextNode('Placeholder');
+  h2.style.margin = '-40px 0 0 10px';
+  h2.appendChild(h2text);
+
+  let p1 = document.createElement("p");
+  let coord = document.createTextNode(''+ tile._x + '.' + tile._y + '.' + tile._z);
+  p1.appendChild(coord);
+
+  let p2 = document.createElement("p");
+  let owner = document.createTextNode(tile.owner);
+  p2.appendChild(owner);
+
+  let p3 = document.createElement("p");
+  let terrain = document.createTextNode('terrain: ' + tile.terrain);
+  p3.appendChild(terrain);
+
+  info.appendChild(img);
+  info.appendChild(h2);
+  info.appendChild(p1);
+  info.appendChild(p2);
+  info.appendChild(p3);
   info.style.boxShadow = '10px -5px 30px 5px black';
-  info.style.position = "absolute";
+  info.style.position = "fixed";
   info.style.color = '#ece271';
   info.style.backgroundColor = "rgb(42, 41, 56)";
-  info.style.width = '200px';
+  info.style.width = '130px';
   info.style.height = '200px';
-  info.style.top = 0 + 'px';
-  info.style.left = 0 +'px';
+  info.style.bottom = 30 + 'px';
+  info.style.right = 30 +'px';
   info.style.zIndex = '4';
-  let owner = tile.getAttribute('owner');
-  info.appendChild(text);
-  if (owner !== "null" && owner !== data.user) {
-    let convoBTN = document.createElement("button");
-    let text = document.createTextNode("Start chat");
-    convoBTN.style.height = '30px';
-    convoBTN.style.width = '80%';
-    convoBTN.style.color = '#ece271';
-    convoBTN.style.backgroundColor = '#4E1717';
-    convoBTN.style.border = '1px solid #1C336A';
-    convoBTN.style.marginLeft = '12px';
-    convoBTN.style.marginTop = '7px';
-    convoBTN.addEventListener('click', openChat);
-    convoBTN.appendChild(text);
-    info.appendChild(convoBTN);
-  }
+
   wrap.appendChild(info);
 };
 
@@ -164,7 +170,6 @@ Interface.spellsInterface = function (spells, user) {
       //and not (let t in tiles) which throws errors
       for (let t = 0; t < tiles.length; t++) {
         tiles[t].setAttribute('stroke','#ece271');
-        tiles[t].style.opacity = '0.6';
         tiles[t].addEventListener('click', Interface.revealTile, true);
       }
     });
@@ -176,6 +181,8 @@ Interface.spellsInterface = function (spells, user) {
 Interface.revealTile = function(event){
   event.stopPropagation();
   let tile = event.target || event.srcElement;
+  let target = tile.getBoundingClientRect();
+  
   let coords = tile.getAttribute('coords');
   console.log("hit! on tile: " + coords);
   let btn = $('spellBtn');
@@ -192,6 +199,11 @@ Interface.revealTile = function(event){
     tiles[t].setAttribute('stroke','#1C336A');
     tiles[t].removeEventListener('click', Interface.revealTile, true);
   }
+  let wrap = $('ui-wrapper');
+  let info = $('tileInfo');
+    if (info !== null){
+      wrap.removeChild(info);
+    }
 }
 
 Interface.resourcesInterface = function(resources){
@@ -209,21 +221,6 @@ Interface.resourcesInterface = function(resources){
   resUi.appendChild(resField);
 };
 
-Interface.borders = function () {
-  let green = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  let blue = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  blue.setAttribute('id','friendly');
-  blue.setAttribute('xmlns', "http://www.w3.org/2000/svg");
-  blue.setAttribute('fill', "url('#blue')");
-  blue.setAttribute('opacity','0.3');
-  svg.appendChild(blue);
-  green.setAttribute('id','sov');
-  green.setAttribute('xmlns', "http://www.w3.org/2000/svg");
-  green.setAttribute('fill', "url('#green')");
-  green.setAttribute('opacity','0.3');
-  svg.appendChild(green);
-};
-
 Interface.renderSVG = function (tile, user, target) {
   let svg = $('svg');
   let wrap = $('main-wrapper');
@@ -233,8 +230,8 @@ Interface.renderSVG = function (tile, user, target) {
   }
   let points = '';
   for (let j = 1; j <= 6; j++) {
-    let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 80;
-    let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 80;
+    let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 79;
+    let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 79;
     points += ' '+pointX+','+pointY+' ';
   }
   let hex = $(tile._x + '.' + tile._y + '.' + tile._z);
@@ -243,30 +240,35 @@ Interface.renderSVG = function (tile, user, target) {
     let coords = JSON.stringify(tile);
     hex.setAttribute('owner', owner);
     hex.setAttribute('stroke-width','2px');
-    hex.setAttribute('stroke','#1C336A');
-    hex.setAttribute('fill','transparent');
+    hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
     hex.setAttribute("id", tile._x + '.' + tile._y + '.' + tile._z);
     hex.setAttribute('class','tile');
-    hex.setAttribute('opacity','0.6');
     hex.setAttribute('coords', coords);
     hex.addEventListener('mouseenter', function(){
-      hex.setAttribute('stroke','#495B87');
-      hex.setAttribute('opacity','1');
+      Interface.tileInfo(tile);
     });
-    hex.addEventListener('mouseleave', function(){
-      hex.setAttribute('stroke','#1C336A');
-      hex.setAttribute('opacity','0.6');
+    hex.addEventListener('mouseleave', function(e){
+      let tile = e.target || e.srcElement;
+      let wrap = $('ui-wrapper');
+      let info = $('tileInfo');
+        if (info !== null){
+        wrap.removeChild(info);
+        }
     });
     if (tile.terrain === null) {
+      hex.setAttribute('stroke','#1C336A');
       hex.setAttribute('class','blank');
-      hex.setAttribute('fill','black');
+      hex.setAttribute('fill', "url('#dust')");
+      hex.setAttribute('opacity','1');
     }  
   }
     //the "points" attribute has to be set last, 
       //otherwise the tiles won't move when the board expands
   if (tile.terrain !== null) {
       hex.setAttribute('class','tile');
-      hex.setAttribute('fill','transparent');
+      hex.setAttribute('fill', "transparent");
+      hex.setAttribute('opacity','1');
+      hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
     }  
     if (owner === user) {
       hex.setAttribute('owner', owner);
