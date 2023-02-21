@@ -4,7 +4,7 @@ const $ = function(foo) {
     return document.getElementById(foo);
 };
 
-const drawAt = function(x,y,z, size) {
+const drawAt = function(tile, size) {
     
   let edgeLength = 80;
   let edgeW = edgeLength * 3/2;
@@ -13,8 +13,8 @@ const drawAt = function(x,y,z, size) {
   let centerX = size[0] /2;
   let centerY = size[1] /2;
     
-  let tx = x* edgeW + centerX;
-  let ty = (-y+z) * edgeH + centerY;
+  let tx = tile._x * edgeW + centerX;
+  let ty = (-tile._y + tile._z) * edgeH + centerY;
   return {x: tx, y: ty, edgeLength};
 };
 

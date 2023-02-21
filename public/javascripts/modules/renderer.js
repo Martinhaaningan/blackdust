@@ -2,11 +2,11 @@ import {drawAt} from './common.js';
 
 let Renderer = {};
 
-Renderer.drawCanvas = function (ctx, key, atlas, target) {
+Renderer.drawCanvas = function (ctx, atlas, tile, target) {
   ctx.moveTo(target.x, target.y);
   ctx.drawImage(
     atlas, //image 
-    (key)* 160, // source x
+    (tile.terrain.key)* 160, // source x
     0,        //source y
     160,      //source width
     160,      //source heigh

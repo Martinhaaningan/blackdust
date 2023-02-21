@@ -51,14 +51,23 @@ Game.update = function () {
 
 Game.animateBoard = function(){
   for (let i in Game.map.tiles) {
-    let target = drawAt(Game.map.tiles[i]._x, Game.map.tiles[i]._y, Game.map.tiles[i]._z, Game.board.size);
-    if (Game.map.tiles[i].terrain !== null) {
-      Renderer.drawCanvas(Game.ctx, Game.map.tiles[i].terrain, Game.tileAtlas, target);
+    let tile = Game.map.tiles[i];
+    let target = drawAt(tile, Game.board.size);
+
+    if (tile.terrain !== null) {
+      
+      let atlas = Game[tile.terrain.atlas];
+      Renderer.drawCanvas(Game.ctx, atlas, tile, target);
     }
-    if (Game.map.tiles[i].terrain === null) {
+    if (tile.terrain === null) {
       Animations.dust(Game.ctx, target, Game.dust);
     }
   }
+}
+
+Game.animateUnits = function(){
+
+  
 }
 
 Game.setBoard = function (gridArray) {
@@ -126,6 +135,7 @@ function initGrid (tiles){
         let found = checkIfExists(neighbors[n], tiles);
         if (!found) {
           neighbors[n].terrain = null;
+          neighbors[n].elevation = 0;
           tiles.push(neighbors[n]);
         }
       }
@@ -194,9 +204,14 @@ Game.prepareTile = function(newTile){
   Game.setBoard(Game.map.tiles);
 
   for (let t in Game.map.tiles) {
-    let target = drawAt(Game.map.tiles[t]._x, Game.map.tiles[t]._y, Game.map.tiles[t]._z, Game.board.size);
-    Interface.renderSVG(Game.map.tiles[t], Game.user, target);
+    console.log('hi');
+    let tile = Game.map.tiles[t];
+
+    let target = drawAt(tile, Game.board.size);
+
+    Interface.renderSVG(tile, Game.user, target);
   }
+
   // let target = drawAt(newTile._x, newTile._y, newTile._z, Game.board.size);
   // Interface.renderSVG(newTile, Game.user, target);
 }
@@ -207,8 +222,9 @@ Game.initMap = function(map){
   Game.map.tiles = initGrid(map.tiles);
   Game.setBoard(Game.map.tiles);
   for (let i = 0; i < Game.map.tiles.length; i++) {
-    let target = drawAt(Game.map.tiles[i]._x, Game.map.tiles[i]._y, Game.map.tiles[i]._z, Game.board.size);
-    Interface.renderSVG(Game.map.tiles[i], Game.user, target);
+    let tile = Game.map.tiles[i];
+    let target = drawAt(tile, Game.board.size);
+    Interface.renderSVG(tile, Game.user, target);
   }
 
   let body = $('body');
@@ -225,38 +241,30 @@ Game.run = function (context) {
   Promise.all(p).then(
 
     function (loaded) {
-    Game.tileAtlas = Loader.getImage('tiles');
-    Game.buildingsAtlas = Loader.getImage('buildings');
-    Game.dust = Loader.getImage('dust');
+      Game.tileAtlas = Loader.getImage('tiles');
+      Game.buildingsAtlas = Loader.getImage('buildings');
+      Game.dust = Loader.getImage('dust');
 
+      Events.getMap(function(map, user){
+        console.log(map);
+        Game.map = map;
+        Game.user = user;
+        Game.initMap(map);
+        Game.animate(Game.update);
+        Game.initAnimations.push(Game.animateBoard);
 
-    
-    Events.getMap(function(map, user){
-      Game.map = map;
-      Game.user = user;
-      Game.initMap(map);
-      Game.animate(Game.update);
-      Game.initAnimations.push(Game.animateBoard);
-
-      Interface.spellsInterface(Game.spells, Game.user);
-      Interface.resourcesInterface(Game.resources);
-      }.bind(this));
-      
+        Interface.spellsInterface(Game.spells, Game.user);
+        Interface.resourcesInterface(Game.resources);
+    }.bind(this));
   });
-  
 };
 
 window.onload = function () {
   let context = $('board').getContext('2d');
   Game.run(context);
 
-
   let wrapper = $('main-wrapper');
-  
   panzoom(wrapper);
-
-
-  
 };
 
 

@@ -225,6 +225,7 @@ Interface.renderSVG = function (tile, user, target) {
   let svg = $('svg');
   let wrap = $('main-wrapper');
   let owner = null;
+
   if(tile.owner !== undefined) {
     owner = tile.owner;
   }
@@ -260,6 +261,8 @@ Interface.renderSVG = function (tile, user, target) {
       hex.setAttribute('class','blank');
       hex.setAttribute('fill', "url('#dust')");
       hex.setAttribute('opacity','1');
+      let blanks = $('blanks');
+      blanks.appendChild(hex);
     }  
   }
     //the "points" attribute has to be set last, 
@@ -269,6 +272,8 @@ Interface.renderSVG = function (tile, user, target) {
       hex.setAttribute('fill', "transparent");
       hex.setAttribute('opacity','1');
       hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
+      let tiles = $('tiles');
+      tiles.appendChild(hex);
     }  
     if (owner === user) {
       hex.setAttribute('owner', owner);
@@ -281,7 +286,6 @@ Interface.renderSVG = function (tile, user, target) {
     }
     hex.setAttribute('owner', owner);
     hex.setAttribute('points', points); 
-    svg.appendChild(hex);
 };
 
 export {Interface};

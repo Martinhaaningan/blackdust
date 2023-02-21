@@ -51,7 +51,7 @@ function getLocal (location, tile){
 //This is witchcraft! Source: https://stackoverflow.com/questions/43011742/how-to-omit-specific-properties-from-an-object-in-javascript/43011802
 function sanitizeTiles (tiles) {
 	let cleanTiles = [];
-	let filter = ({_x, _y, _z, terrain, owner}) => ({_x, _y, _z, terrain, owner})
+	let filter = ({_x, _y, _z, terrain, owner, elevation, slots, resources}) => ({_x, _y, _z, terrain, owner, elevation, slots, resources})
 	for (let t in tiles) {
 		let filtered = filter(tiles[t]);
 		cleanTiles.push(filtered);
@@ -111,8 +111,6 @@ exports.createMap = async function (Id) {
 		let newMap = await mapModel.findOne({owner: Id});
 
 		let grid = createGrid(1);
-		let tiles = [];
-
 		for (let t in grid) {
 
 			let tile = new tileModel({
@@ -120,8 +118,14 @@ exports.createMap = async function (Id) {
 			_x: grid[t]._x,
 			_y: grid[t]._y,
 			_z: grid[t]._z,
-			terrain: roll(3),
-			owner: user.name
+			owner: user.name,
+			elevation: 1,
+			terrain: {
+				key: 0,
+				atlas: "tileAtlas"
+			},
+			resources: [],
+			slots: []
 			});
 			await tile.save();
 		}
@@ -185,7 +189,13 @@ exports.rollNewTile = async function(Id, coords) {
 			_x: tile._x,
 			_y: tile._y,
 			_z: tile._z,
-			terrain: roll(5)
+			elevation: 1,
+			terrain: {
+				key: 0,
+				atlas: "tileAtlas"
+			},
+			resources: [],
+			slots: []
 			});
 		await newTile.save();
 		return newTile;

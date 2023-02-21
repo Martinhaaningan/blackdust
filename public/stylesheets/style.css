@@ -21,6 +21,14 @@ animation: fade 5s;
 -o-animation: fade 5s;
 }
 
+.blank {
+
+  -webkit-filter: drop-shadow( 8px 8px 6px rgba(0, 0, 0, .9));
+  filter: drop-shadow( 8px 8px 6px rgba(0, 0, 0, .9));
+display: block;
+
+}
+
 #body {
   background-color: black;
   background-image: none;
@@ -85,6 +93,7 @@ border-bottom: 1px solid #1C336A;
 a {
   color: #ece271;
   text-align: center;
+  text-decoration: none;
 }
 .button {
   display: inline-block;
@@ -104,6 +113,10 @@ li {
   padding: 8px 20px 7px 20px;
   border: 1px solid #1C336A;
   box-shadow:  0 -5px 6px -3px black, 0 5px 4px -3px rgb(0, 0, 0, 0.6);
+}
+
+li:hover {
+  border: 1px solid #ece271;
 }
 
 #board{
@@ -194,6 +207,7 @@ h1, p {
 }
 
 button:hover {
+  border: 1px solid #ece271;
   stroke: #495B87;
   opacity: 1.0;
 }

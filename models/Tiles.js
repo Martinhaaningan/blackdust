@@ -1,5 +1,38 @@
 const mongoose = require('mongoose'), Schema = mongoose.Schema;
 
+const terrain = mongoose.Schema({
+	key: {
+		type: Number,
+		required: true
+	},
+	atlas: {
+		type: String,
+		required: true
+	}
+});
+
+const slot = mongoose.Schema({
+	size: {
+		type: String,
+		required: true
+	},
+	building:{
+		type: Object,
+		default: null
+	} 
+});
+
+const resource = mongoose.Schema({
+	amount: {
+		type: Number,
+		required: true
+	},
+	name: {
+		type: String,
+		required: true
+	}
+});
+
 const tiles = mongoose.Schema({
 	map: {
 		type: Schema.Types.ObjectId,
@@ -22,11 +55,13 @@ const tiles = mongoose.Schema({
 		type: Number,
 		required:true
 	},
-	terrain: {
+	elevation: {
 		type: Number,
-		required:true,
-		default: null
-	},	
+		required: true
+	},
+	slots: [slot],
+	terrain: terrain,
+	resources: [resource],	
 	sharedBy: {
 		type: Array,
 		default: []

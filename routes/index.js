@@ -55,7 +55,7 @@ module.exports = function (io) {
     socket.on('message', function(msg) {
       io.emit('message', msg);
     });
-});
+  });
 
 
 
