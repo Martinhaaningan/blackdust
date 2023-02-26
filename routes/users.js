@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const auth = require('../controllers/auth');
-const game = require('../controllers/game');
+//const game = require('../controllers/game');
 
 const { forwardAuthenticated, ensureAuthenticated} = require('../services/auth');
 

@@ -221,7 +221,7 @@ Interface.resourcesInterface = function(resources){
   resUi.appendChild(resField);
 };
 
-Interface.renderSVG = function (tile, user, target) {
+Interface.renderSVG = function (tile, user) {
   let svg = $('svg');
   let wrap = $('main-wrapper');
   let owner = null;
@@ -230,11 +230,12 @@ Interface.renderSVG = function (tile, user, target) {
     owner = tile.owner;
   }
   let points = '';
-  for (let j = 1; j <= 6; j++) {
-    let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 79;
-    let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 79;
-    points += ' '+pointX+','+pointY+' ';
+  //call drawAt function and loop through the point values to add to a string
+  let target = drawAt(tile, Game.board.size);
+  for (let i in target.px) {
+    points += ' ' +target.px[i]+ ','+ target.py[i]+' '; 
   }
+
   let hex = $(tile._x + '.' + tile._y + '.' + tile._z);
   if (hex === null) {
     hex = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');

@@ -50,12 +50,12 @@ Game.update = function () {
 }
 
 Game.animateBoard = function(){
+
   for (let i in Game.map.tiles) {
     let tile = Game.map.tiles[i];
     let target = drawAt(tile, Game.board.size);
 
     if (tile.terrain !== null) {
-      
       let atlas = Game[tile.terrain.atlas];
       Renderer.drawCanvas(Game.ctx, atlas, tile, target);
     }
@@ -67,7 +67,7 @@ Game.animateBoard = function(){
 
 Game.animateUnits = function(){
 
-  
+
 }
 
 Game.setBoard = function (gridArray) {
@@ -207,9 +207,7 @@ Game.prepareTile = function(newTile){
     console.log('hi');
     let tile = Game.map.tiles[t];
 
-    let target = drawAt(tile, Game.board.size);
-
-    Interface.renderSVG(tile, Game.user, target);
+    Interface.renderSVG(tile, Game.user);
   }
 
   // let target = drawAt(newTile._x, newTile._y, newTile._z, Game.board.size);
@@ -223,10 +221,9 @@ Game.initMap = function(map){
   Game.setBoard(Game.map.tiles);
   for (let i = 0; i < Game.map.tiles.length; i++) {
     let tile = Game.map.tiles[i];
-    let target = drawAt(tile, Game.board.size);
-    Interface.renderSVG(tile, Game.user, target);
+    Interface.renderSVG(tile, Game.user);
   }
-
+  
   let body = $('body');
   let canvas = $('board');
 
