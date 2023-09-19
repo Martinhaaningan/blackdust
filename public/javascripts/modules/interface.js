@@ -221,7 +221,7 @@ Interface.resourcesInterface = function(resources){
   resUi.appendChild(resField);
 };
 
-Interface.renderSVG = function (tile, user) {
+Interface.renderSVG = function (tile, user, target) {
   let svg = $('svg');
   let wrap = $('main-wrapper');
   let owner = null;
@@ -230,19 +230,18 @@ Interface.renderSVG = function (tile, user) {
     owner = tile.owner;
   }
   let points = '';
-  //call drawAt function and loop through the point values to add to a string
-  let target = drawAt(tile, Game.board.size, 80);
-  for (let i in target.px) {
-    points += ' ' +target.px[i]+ ','+ target.py[i]+' '; 
+  for (let j = 1; j <= 6; j++) {
+    let pointX = target.x + Math.cos(j / 6 * (Math.PI *2)) * 79;
+    let pointY = target.y + Math.sin(j / 6 * (Math.PI *2)) * 79;
+    points += ' '+pointX+','+pointY+' ';
   }
-
   let hex = $(tile._x + '.' + tile._y + '.' + tile._z);
   if (hex === null) {
     hex = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
     let coords = JSON.stringify(tile);
     hex.setAttribute('owner', owner);
     hex.setAttribute('stroke-width','2px');
-    //hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
+    hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
     hex.setAttribute("id", tile._x + '.' + tile._y + '.' + tile._z);
     hex.setAttribute('class','tile');
     hex.setAttribute('coords', coords);
@@ -272,13 +271,13 @@ Interface.renderSVG = function (tile, user) {
       hex.setAttribute('class','tile');
       hex.setAttribute('fill', "transparent");
       hex.setAttribute('opacity','1');
-      //hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
+      hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
       let tiles = $('tiles');
       tiles.appendChild(hex);
     }  
     if (owner === user) {
       hex.setAttribute('owner', owner);
-      //hex.setAttribute('fill', "url('#green')");
+      hex.setAttribute('fill', "url('#green')");
     } 
 
     if (owner !== user && owner !== null) {
