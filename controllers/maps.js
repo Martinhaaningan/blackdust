@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const userModel = require('../models/User');
 const mapModel = require('../models/Map');
 const tileModel = require('../models/Tiles');
+const unitModel = require('../models/Unit');
 
 function roll(s) {
 	return Math.floor(Math.random()*s);
@@ -35,9 +36,10 @@ function sanitizeTiles (tiles) {
 
 exports.getMap = async function(Id) {
 	let map;
+	let units;
 	try {
 		map = await mapModel.findOne({owner: Id});
-		
+		units = await unitModel.find({owner: Id});
 		//get tile, add to map
 		if (map !== null) {
 			let localTiles = await tileModel.find({map: map._id}, {});
@@ -61,6 +63,7 @@ exports.getMap = async function(Id) {
 			tiles = sanitizeTiles(tiles);
 
 			map.tiles = tiles;
+			map.units = units;
 			}
 		} catch (err){
 			console.log(err);
@@ -70,16 +73,18 @@ exports.getMap = async function(Id) {
 }
 
 
-exports.rollNewTile = async function(Id, coords) {
+exports.tetherFlare = async function(Id, data) {
 	let user = await userModel.findById({_id: Id});
 	let map = await mapModel.findOne({owner: user._id});
-
 	let tile;
+
 	try {
-		tile = JSON.parse(coords);
+		let obj = JSON.parse(data);	
+		tile = obj.coords;
 		} catch (err){
 			console.log(err);
 	}
+	console.log(tile);
 	//the map.location has a key set of coordinates, 
 		//that point to the location of a players map in the region 
 	

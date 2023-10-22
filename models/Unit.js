@@ -10,8 +10,8 @@ const unit = mongoose.Schema({
 		required: true
 	},
 	owner: {
-		type: String,
-		default: null
+		type: Schema.Types.ObjectId,
+		ref: "User"
 	},
 	_x: {
 		type: Number,
@@ -25,6 +25,17 @@ const unit = mongoose.Schema({
 		type: Number,
 		required:true
 	},
+	abilities: {
+		type: Array
+	},
+	initiative: {
+		type: Number,
+		required: true
+	},
+	mana: {
+		type: Number,
+		required: true
+	}
 
 });
 

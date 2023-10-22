@@ -3,7 +3,55 @@ import {Events} from './events.js';
 import {Game} from '../main.js';
 import {Animations} from './animations.js';
 let Interface = {}
-let activeSpell;
+
+function isMatch(arr, val){
+  return arr.some(function(arrVal){
+    if (val._x === arrVal._x && val._y === arrVal._y && val._z === arrVal._z){
+      return true;
+    }
+  })
+}
+
+function getNeighbors(tile) {
+  var vectors = [
+    {x: 1,y: 0,z: -1}, {x: 1,y: -1,z: 0}, 
+    {x: 0,y: -1,z: 1}, {x: -1,y: 0,z: 1}, 
+    {x: -1,y: 1,z: 0}, {x: 0,y: +1,z: -1} 
+    ];
+  let neighbors = [];
+  for (let i in vectors) {
+    let vector = Object.values(vectors[i]);
+    let val = Object.values(tile);
+    let neighbor = {_x: tile._x + vector[0], _y: tile._y + 
+      vector[1], _z: tile._z + vector[2]};
+    neighbors.push(neighbor); 
+  }
+  return neighbors;
+};
+
+Interface.getValidTiles = function (entity,range) {
+
+  let tiles = getNeighbors(entity);
+  range = range - 1;
+  for (range >= 0; range--;) {
+    for (let t in tiles) {
+      let neighbors = getNeighbors(tiles[t]);
+        for (let n in neighbors) {
+        let match = isMatch(tiles, neighbors[n]);
+        if(!match) {
+          tiles.push(neighbors[n]);
+        }
+      }
+    }
+  }
+  let ids = [];
+  for (let t in tiles) {
+    let id = '';
+    id = id + tiles[t]._x +"."+ tiles[t]._y +"."+ tiles[t]._z;
+    ids.push(id);
+  }
+  return ids;
+}
 
 Interface.openChat = function (){
   let wrap = $('ui-wrapper');
@@ -114,97 +162,254 @@ Interface.tileInfo = function (tile){
   wrap.appendChild(info);
 };
 
-Interface.spellsInterface = function (spells, user) {
-  let spellsUi = $('spells-ui');
-    let spellCard = document.createElement('div');
-    spellCard.setAttribute('class', 'spellCard');
-    spellCard.style.height = '200px';
-    spellCard.style.width = '130px';
-    spellCard.style.top = 100 + 'px';
-    spellCard.style.left = '100px';
-    spellCard.style.backgroundColor = '#2a2938';
-    spellCard.style.border = '5px solid black';
-    spellCard.style.outline = '2px solid #1C336A';
-    spellCard.style.boxShadow = '10px -5px 30px 5px black';
-    spellCard.style.position = 'absolute';
-    spellCard.style.borderRadius = '15px';
-    spellCard.addEventListener('mouseenter', function(){
-      spellCard.style.zIndex = 1;
+// Interface.spellsInterface = function (spells, user) {
+//   let spellsUi = $('spells-ui');
+//     let spellCard = document.createElement('div');
+//     spellCard.setAttribute('class', 'spellCard');
+//     spellCard.style.height = '200px';
+//     spellCard.style.width = '130px';
+//     spellCard.style.top = 100 + 'px';
+//     spellCard.style.left = '100px';
+//     spellCard.style.backgroundColor = '#2a2938';
+//     spellCard.style.border = '5px solid black';
+//     spellCard.style.outline = '2px solid #1C336A';
+//     spellCard.style.boxShadow = '10px -5px 30px 5px black';
+//     spellCard.style.position = 'absolute';
+//     spellCard.style.borderRadius = '15px';
+//     spellCard.addEventListener('mouseenter', function(){
+//       spellCard.style.zIndex = 1;
+//     });
+
+//     spellCard.addEventListener('mouseleave', function(){
+//       spellCard.style.zIndex = 0;
+//     });
+
+//     let label = document.createElement('p');
+//     label.innerHTML = spells[0];
+//     spellCard.appendChild(label);
+
+//     let img = document.createElement('IMG');
+//     img.setAttribute('src', '/images/tether.jpg');
+//     img.setAttribute('width', '100%');
+//     spellCard.appendChild(img);
+
+//     let desc = document.createElement('p');
+//     desc.innerHTML = "Launches a rocket loaded with tether at a tile";
+//     desc.style.marginTop = '-4px'; 
+//     spellCard.appendChild(desc);
+
+//     let activateBtn = document.createElement('button');
+//     let text = document.createTextNode("Cast");
+//     activateBtn.setAttribute('class','button');
+//     activateBtn.setAttribute('id','spellBtn');
+//     activateBtn.style.height = '30px';
+//     activateBtn.style.width = '80%';
+//     activateBtn.style.color = '#ece271';
+//     activateBtn.style.backgroundColor = '#4E1717';
+//     activateBtn.style.border = '1px solid #1C336A';
+//     activateBtn.style.marginLeft = '12px';
+//     activateBtn.style.marginTop = '7px';
+//     activateBtn.style.opacity = '0.8';
+//     activateBtn.addEventListener('click', function(){
+//       activateBtn.style.opacity = '1';
+//       activateBtn.style.border = '1px solid #ece271';
+      
+//       let tiles = document.getElementsByClassName('blank');
+//       //Note: when it's a nodelist you must use this loop,
+//       //and not (let t in tiles) which throws errors
+//       for (let t = 0; t < tiles.length; t++) {
+//         tiles[t].setAttribute('stroke','#ece271');
+//         tiles[t].addEventListener('click', Interface.revealTile, true);
+//       }
+//     });
+//     activateBtn.appendChild(text);
+//     spellCard.appendChild(activateBtn);
+//     spellsUi.appendChild(spellCard);
+// };
+
+Interface.abilities = function(event){
+
+  //Vi skal først have cleared actionbar hvis den er der allerede
+  let uiWrapper = $('ui-wrapper');
+  let clearBar = $('actionBar');
+  let clearActive = $('activeUnit');
+  if (clearBar) {
+    uiWrapper.removeChild(clearBar);
+    clearActive.removeAttribute('id');
+  }
+  
+
+  event.stopPropagation();
+  let unitFrame = event.target || event.srcElement;
+  unitFrame.setAttribute('id','activeUnit');
+  
+  if (!$('actionBar')) {
+    let json = unitFrame.getAttribute('entity');
+    let unit = JSON.parse(json);
+
+    let actionBar = document.createElement('div');
+    actionBar.style.bottom = '50px';
+    actionBar.style.left = '0';
+    actionBar.style.height = '200px';
+    actionBar.style.marginLeft = '10%';
+    //actionBar.style.width = unit.abilities.length;
+    actionBar.style.position = 'fixed';
+    actionBar.setAttribute('id', 'actionBar');
+
+    let exit =  document.createElement('div');
+    exit.style.left = '0';
+    exit.style.height = '20px';
+    exit.style.width = '20px';
+    exit.style.backgroundColor = 'red';
+    exit.style.borderRadius = '20px';
+    exit.style.border = '1px solid #1C336A';
+
+
+    exit.addEventListener('click', function(){
+      location.reload();
+      //uiWrapper.removeChild(actionBar);
     });
+    actionBar.appendChild(exit);
 
-    spellCard.addEventListener('mouseleave', function(){
-      spellCard.style.zIndex = 0;
-    });
+    for(let a in unit.abilities) {
+      let spellCard = document.createElement('div');
+      spellCard.setAttribute('class', 'spellCard');
+      spellCard.style.height = '200px';
+      spellCard.style.width = '130px';
+      spellCard.style.left = 20 + 150 * a + 'px';
+      spellCard.style.backgroundColor = '#2a2938';
+      spellCard.style.border = '5px solid black';
+      spellCard.style.outline = '2px solid #1C336A';
+      spellCard.style.boxShadow = '10px -5px 30px 5px black';
+      spellCard.style.position = 'absolute';
+      spellCard.style.borderRadius = '15px';
 
-    let label = document.createElement('p');
-    label.innerHTML = spells[0];
-    spellCard.appendChild(label);
+      let label = document.createElement('p');
+      label.innerHTML = unit.abilities[a].label;
+      spellCard.appendChild(label);
 
-    let img = document.createElement('IMG');
-    img.setAttribute('src', '/images/tether.jpg');
-    img.setAttribute('width', '100%');
-    spellCard.appendChild(img);
+      let img = document.createElement('IMG');
+      img.setAttribute('src', '/images/tether.jpg');
+      img.setAttribute('width', '100%');
+      spellCard.appendChild(img);
 
-    let desc = document.createElement('p');
-    desc.innerHTML = "Launches a rocket loaded with tether at a tile";
-    desc.style.marginTop = '-4px'; 
-    spellCard.appendChild(desc);
+      let desc = document.createElement('p');
+      desc.innerHTML = unit.abilities[a].desc;
+      desc.style.marginTop = '-4px'; 
+      spellCard.appendChild(desc);
 
-    let activateBtn = document.createElement('button');
-    let text = document.createTextNode("Cast");
-    activateBtn.setAttribute('class','button');
-    activateBtn.setAttribute('id','spellBtn');
-    activateBtn.style.height = '30px';
-    activateBtn.style.width = '80%';
-    activateBtn.style.color = '#ece271';
-    activateBtn.style.backgroundColor = '#4E1717';
-    activateBtn.style.border = '1px solid #1C336A';
-    activateBtn.style.marginLeft = '12px';
-    activateBtn.style.marginTop = '7px';
-    activateBtn.style.opacity = '0.8';
-    activateBtn.addEventListener('click', function(){
-      activateBtn.style.opacity = '1';
-      activateBtn.style.border = '1px solid #ece271';
-      let tiles = document.getElementsByClassName('blank');
-      //Note: when it's a nodelist you must use this loop,
-      //and not (let t in tiles) which throws errors
-      for (let t = 0; t < tiles.length; t++) {
-        tiles[t].setAttribute('stroke','#ece271');
-        tiles[t].addEventListener('click', Interface.revealTile, true);
+      let activateBtn = document.createElement('button');
+      let text = document.createTextNode("Cast");
+      activateBtn.setAttribute('class','actionBtn');
+      activateBtn.style.height = '30px';
+      activateBtn.style.width = '80%';
+      activateBtn.style.color = '#ece271';
+      activateBtn.style.backgroundColor = '#4E1717';
+      activateBtn.style.border = '1px solid #1C336A';
+      activateBtn.style.marginLeft = '12px';
+      activateBtn.style.marginTop = '7px';
+      activateBtn.style.opacity = '0.8';
+
+      activateBtn.addEventListener('click', function eventHandler(){
+        //activateBtn.removeEventListener('click', eventHandler, true);
+
+        let buttons = document.getElementsByClassName('actionBtn');
+        for (let b = 0; b < buttons.length; b++) {
+          buttons[b].removeEventListener('click', eventHandler, true);
+          buttons[b].style.display = "none";
+        }
+
+        activateBtn.setAttribute('id','activeSpell');
+        activateBtn.style.opacity = '1';
+        activateBtn.style.border = '1px solid #ece271';
+        let json = JSON.stringify(unit.abilities[a]);
+        activateBtn.setAttribute('action', json);
+        let tiles = Interface.getValidTiles(unit, unit.abilities[a].range);
+        for (let t in tiles) {
+          let tile = $(tiles[t]);
+          if (tile != null) {
+          tile.setAttribute('stroke','#ece271');
+          tile.addEventListener('click', Interface.action, true);
+          //we need to set a rule for which tiles are valid targets for a given ability
+          }
+        }
+        //need function that returns array of valid tiles
+        //let tiles = document.getElementsByClassName('blank');
+        //Note: when it's a nodelist you must use this loop,
+        //and not (let t in tiles) which throws errors
+        // // for (let t = 0; t < tiles.length; t++) {
+        // //   tiles[t].setAttribute('stroke','#ece271');
+        // //   tiles[t].addEventListener('click', Interface.revealTile, true);
+        // }
+      });
+
+      uiWrapper.appendChild(actionBar);
+      
+      activateBtn.appendChild(text);
+      spellCard.appendChild(activateBtn);
+      actionBar.appendChild(spellCard);
       }
-    });
-    activateBtn.appendChild(text);
-    spellCard.appendChild(activateBtn);
-    spellsUi.appendChild(spellCard);
-};
+    }
+  }
 
-Interface.revealTile = function(event){
+Interface.removeAction = function() {
+
+  }
+
+ Interface.action = function(event) {
   event.stopPropagation();
   let tile = event.target || event.srcElement;
-  let target = tile.getBoundingClientRect();
   
-  let coords = tile.getAttribute('coords');
-  console.log("hit! on tile: " + coords);
-  let btn = $('spellBtn');
-  btn.style.opacity = '0.8';
-  btn.style.border = '1px solid #1C336A';
-  Events.tileRequest(coords);
-  Events.tileResult(function(newTile){
-    Game.prepareTile(newTile);
-  });
-  let tiles = document.getElementsByClassName('blank');
-    //Note: when it's a nodelist you must use this loop,
-      //and not (let t in tiles) which throws errors
-  for (let t= 0; t < tiles.length; t++) {
-    tiles[t].setAttribute('stroke','#1C336A');
-    tiles[t].removeEventListener('click', Interface.revealTile, true);
-  }
-  let wrap = $('ui-wrapper');
-  let info = $('tileInfo');
-    if (info !== null){
-      wrap.removeChild(info);
-    }
-}
+
+  let json = tile.getAttribute('coords');
+  let coordsOBJ = JSON.parse(json);
+
+  let action = $('activeSpell');
+  let json2 = action.getAttribute('action');
+  let actionOBJ = JSON.parse(json2);
+
+  let unit = $('activeUnit');
+  let json3 = unit.getAttribute('entity');
+  let unitOBJ = JSON.parse(json3);
+
+  let obj = {};
+  obj.coords = coordsOBJ;
+  obj.action = actionOBJ;
+  obj.unit = unitOBJ;
+  let data = JSON.stringify(obj);
+  Events.actionRequest(data);
+  Events.refresh();
+ }
+
+
+// Interface.revealTile = function(event){
+//   event.stopPropagation();
+//   let tile = event.target || event.srcElement;
+//   let target = tile.getBoundingClientRect();
+  
+//   let coords = tile.getAttribute('coords');
+//   //do the same but with an action that has been set to attribute or id "active" 
+//   console.log("hit! on tile: " + coords);
+//   let btn = $('activated');
+//   btn.style.opacity = '0.8';
+//   btn.style.border = '1px solid #1C336A';
+//   Events.tileRequest(coords);
+//   Events.tileResult(function(newTile){
+//     Game.prepareTile(newTile);
+//   });
+//   let tiles = document.getElementsByClassName('blank');
+//     //Note: when it's a nodelist you must use this loop,
+//       //and not (let t in tiles) which throws errors
+//   for (let t= 0; t < tiles.length; t++) {
+//     tiles[t].setAttribute('stroke','#1C336A');
+//     tiles[t].removeEventListener('click', Interface.revealTile, true);
+//   }
+//   let wrap = $('ui-wrapper');
+//   let info = $('tileInfo');
+//     if (info !== null){
+//       wrap.removeChild(info);
+//     }
+// }
 
 Interface.resourcesInterface = function(resources){
   let resUi = $('resources-ui');
@@ -221,7 +426,7 @@ Interface.resourcesInterface = function(resources){
   resUi.appendChild(resField);
 };
 
-Interface.renderSVG = function (tile, user, target) {
+Interface.tileSVG = function (tile, user, target) {
   let svg = $('svg');
   let wrap = $('main-wrapper');
   let owner = null;
@@ -287,5 +492,29 @@ Interface.renderSVG = function (tile, user, target) {
     hex.setAttribute('owner', owner);
     hex.setAttribute('points', points); 
 };
+
+Interface.unitSVG = function (unit, user, target) {
+  let svg = $('svg');
+  let wrap = $('main-wrapper');
+  let unitFrame = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+  let entity = JSON.stringify(unit);
+  
+  unitFrame.setAttribute('entity', entity);
+  unitFrame.setAttribute('class','unit');
+  let center = drawAt(unit, Game.board.size);
+  unitFrame.setAttribute('cx', center.x );
+  unitFrame.setAttribute('cy', center.y );
+  unitFrame.setAttribute('r', 45);
+  unitFrame.setAttribute('stroke-width','2px');
+  unitFrame.setAttribute('stroke','rgb(30,30,30, 0.8)');
+  unitFrame.setAttribute('fill', "transparent");
+
+  unitFrame.addEventListener('mouseenter', function(e){
+    });
+  unitFrame.addEventListener('mouseleave', function(e){
+    });
+  unitFrame.addEventListener('click', Interface.abilities);
+  svg.appendChild(unitFrame);
+  }
 
 export {Interface};

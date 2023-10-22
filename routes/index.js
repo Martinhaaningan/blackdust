@@ -4,6 +4,9 @@ const maps = require('../controllers/maps');
 const init = require('../controllers/init');
 const users = require('../controllers/users');
 const units = require('../controllers/units');
+const moves = require('../controllers/moves');
+const actions = require('../controllers/actions');
+
 
 const { forwardAuthenticated, ensureAuthenticated} = require('../services/auth');
 
@@ -14,9 +17,9 @@ router.get('/', function(req, res, next) {
   user: user});
 });
 
-router.get('/news', function(req, res, next) {
+router.get('/info', function(req, res, next) {
   let user = req.user ? req.user.email: null; 
-  res.render('news', { title: 'Express',
+  res.render('info', { title: 'Express',
   user: user});
 });
 
@@ -39,6 +42,7 @@ module.exports = function (io) {
       //if no board is found we need to run a startup routine
       if (board === null) {
         await init.createMap(userID);
+        await units.createUnit(userID);
         board = await maps.getMap(userID);
       }
       await maps.addToRegion(userID);
@@ -49,13 +53,29 @@ module.exports = function (io) {
     });
 
     
-    socket.on('tileClicked', async function(coords){
-      console.log('The user clicked on tile: ' + coords);
+    // socket.on('tileClicked', async function(coords){
+    //   console.log('The user clicked on tile: ' + coords);
+
+    //   let userID = socket.handshake.session.passport.user;
+    //   let newTile = await maps.rollNewTile(userID, coords);
+
+    //   socket.emit('rolledTile', newTile);
+    // });
+
+    //new action functionality
+    socket.on('action', async function(data){
+      //console.log('The user requested an action on tile: ' + data);
 
       let userID = socket.handshake.session.passport.user;
-      let newTile = await maps.rollNewTile(userID, coords);
+      
+      await actions.handler(userID, data);
+      
+      let board = await maps.getMap(userID);
+      let user = await users.getUser(userID);
 
-      socket.emit('rolledTile', newTile);
+      socket.emit('refresh', function(res) {
+        console.log('client responded with: ' + res);
+      });
     });
 
     socket.on('message', function(msg) {

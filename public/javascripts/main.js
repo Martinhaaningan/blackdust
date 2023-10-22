@@ -21,15 +21,11 @@ Game.initAnimations = [];
 //   }
 // });
 
-
-
-
-Game.spells = ["Tether flare"];
-Game.spells.activeSpell = null;
 Game.resources = {tether: 1000, resource1: 0, resource2: 0, resource3: 0, resource4: 0};
 
 Game.load = function () {
     return [
+        Loader.loadImage('units', './images/units.png'),
         Loader.loadImage('tiles', './images/tiles.png'),
         Loader.loadImage('buildings', './images/buildings.png'),
         Loader.loadImage('dust', './images/dust.png')
@@ -66,31 +62,19 @@ Game.renderBoard = function(){
 
     if (tile.terrain !== null) {
       Renderer.tiles(Game.sctx, Game.tileAtlas, tile, Game.board.size);
-    }
 
+    }
   }
+
+  for (let i in Game.map.units) {
+    let unit = Game.map.units[i];
+    Renderer.tiles(Game.sctx, Game.unitAtlas, unit, Game.board.size);
+  } 
 
 }
 
-// Game.animateBoard = function(){
-//   for (let i in Game.map.tiles) {
-//     let tile = Game.map.tiles[i];
-//     let target = drawAt(tile, Game.board.size);
-
-//     if (tile.terrain !== null) {
-      
-//       let atlas = Game[tile.terrain.atlas];
-//       Renderer.drawCanvas(Game.ctx, atlas, tile, target);
-//     }
-//     if (tile.terrain === null) {
-//       Animations.dust(Game.ctx, target, Game.dust);
-//     }
-//   }
-// }
-
 Game.animateUnits = function(){
 
-  
 }
 
 Game.setBoard = function (gridArray) {
@@ -235,7 +219,7 @@ Game.prepareTile = function(newTile){
 
     let target = drawAt(tile, Game.board.size);
 
-    Interface.renderSVG(tile, Game.user, target);
+    Interface.tileSVG(tile, Game.user, target);
   }
   Game.renderBoard();
   // let target = drawAt(newTile._x, newTile._y, newTile._z, Game.board.size);
@@ -250,10 +234,17 @@ Game.initMap = function(map){
   for (let i = 0; i < Game.map.tiles.length; i++) {
     let tile = Game.map.tiles[i];
     let target = drawAt(tile, Game.board.size);
-    Interface.renderSVG(tile, Game.user, target);
+    Interface.tileSVG(tile, Game.user, target);
   }
+
+  for (let i = 0; i < Game.map.units.length; i++) {
+    let unit = Game.map.units[i];
+    let target = drawAt(unit, Game.board.size);
+    Interface.unitSVG(unit, Game.user, target);
+  }
+
   Game.renderBoard();
-  
+
   let body = $('body');
   let canvas = $('board');
 
@@ -270,6 +261,8 @@ Game.run = function (sctx, actx) {
 
     function (loaded) {
       Game.tileAtlas = Loader.getImage('tiles');
+      Game.unitAtlas = Loader.getImage('units');
+
       Game.buildingsAtlas = Loader.getImage('buildings');
       Game.dust = Loader.getImage('dust');
 
@@ -282,7 +275,6 @@ Game.run = function (sctx, actx) {
         Game.animate(Game.update);
         Game.initAnimations.push(Game.animateStage);
 
-        Interface.spellsInterface(Game.spells, Game.user);
         Interface.resourcesInterface(Game.resources);
     }.bind(this));
   });

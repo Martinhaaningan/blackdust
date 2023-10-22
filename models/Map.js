@@ -32,6 +32,10 @@ const map = mongoose.Schema({
 		type: Array,
 		default: null
 	},
+	units: {
+		type: Array,
+		default: null
+	},
 	location: {
 		location,
 		type: Object,

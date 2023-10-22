@@ -34,11 +34,22 @@ Events.tileRequest = async function(coords) {
 	socket.emit('tileClicked', coords);
 }
 
-Events.tileResult = async function(onDone) {
-	socket.on('rolledTile', function(newTile) {
-	  console.log('A tile has been revealed. Rendering...');
-	  onDone(newTile);
-	});
+Events.actionRequest = async function(data) {
+  socket.emit('action', data);
+  }
+
+// Events.tileResult = async function(onDone) {
+// 	socket.on('rolledTile', function(newTile) {
+// 	  location.reload();
+//     //onDone(newTile);
+// 	});
+// }
+
+Events.refresh = async function(onDone) {
+  socket.on('refresh', function() {
+    location.reload();
+    //onDone(newTile);
+  });
 }
 
 export {Events}

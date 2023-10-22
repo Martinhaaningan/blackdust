@@ -164,6 +164,9 @@ li:hover {
 polygon:hover {
   stroke: rgb(102,153,255, 1);
 }
+circle:hover {
+  stroke: rgb(102,153,255, 1);
+}
 
 #ui-wrapper {
   position: absolute;
