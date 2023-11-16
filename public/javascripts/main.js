@@ -240,7 +240,7 @@ Game.initMap = function(map){
   for (let i = 0; i < Game.map.units.length; i++) {
     let unit = Game.map.units[i];
     let target = drawAt(unit, Game.board.size);
-    Interface.unitSVG(unit, Game.user, target);
+    Interface.unitSVG(unit, Game.map.owner, target);
   }
 
   Game.renderBoard();

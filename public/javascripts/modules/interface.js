@@ -446,7 +446,7 @@ Interface.tileSVG = function (tile, user, target) {
     let coords = JSON.stringify(tile);
     hex.setAttribute('owner', owner);
     hex.setAttribute('stroke-width','2px');
-    hex.setAttribute('stroke','rgb(30,30,30, 0.8)');
+    hex.setAttribute('stroke','rgb(30,30,30, 0.1)');
     hex.setAttribute("id", tile._x + '.' + tile._y + '.' + tile._z);
     hex.setAttribute('class','tile');
     hex.setAttribute('coords', coords);
@@ -483,6 +483,7 @@ Interface.tileSVG = function (tile, user, target) {
     if (owner === user) {
       hex.setAttribute('owner', owner);
       hex.setAttribute('fill', "url('#green')");
+      hex.setAttribute('stroke','rgb(0,255,0, 0.6)');
     } 
 
     if (owner !== user && owner !== null) {
@@ -498,6 +499,10 @@ Interface.unitSVG = function (unit, user, target) {
   let wrap = $('main-wrapper');
   let unitFrame = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
   let entity = JSON.stringify(unit);
+  let owner = null;
+  if(unit.owner !== undefined) {
+    owner = unit.owner;
+  }
   
   unitFrame.setAttribute('entity', entity);
   unitFrame.setAttribute('class','unit');
@@ -506,8 +511,12 @@ Interface.unitSVG = function (unit, user, target) {
   unitFrame.setAttribute('cy', center.y );
   unitFrame.setAttribute('r', 45);
   unitFrame.setAttribute('stroke-width','2px');
-  unitFrame.setAttribute('stroke','rgb(30,30,30, 0.8)');
-  unitFrame.setAttribute('fill', "transparent");
+  unitFrame.setAttribute('stroke','rgb(0,255,0, 0.6)');
+  //unitFrame.setAttribute('fill', "url('#green')");
+    if (owner === user) {
+      unitFrame.setAttribute('owner', owner);
+      unitFrame.setAttribute('fill', "url('#green')");
+    } 
 
   unitFrame.addEventListener('mouseenter', function(e){
     });
