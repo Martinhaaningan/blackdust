@@ -6,8 +6,8 @@ const formidable = require('formidable');
 const userModel = require('../models/User');
 
 exports.postRegister = async function (req, res, next) {
-
 	let form = new formidable.IncomingForm();
+
     form.parse(req, async function(err, fields, files) {
         if (err) {console.error(err);}
 
@@ -61,8 +61,45 @@ exports.postRegister = async function (req, res, next) {
 	});
 }
 
+exports.demoPostLogin = async function (req, res, next) {
+	let name = req.body.uid;
+	let password = name;
+	let email = name + '@' + name + '.dk';
+
+	let userExists = await userModel.exists({$or: [{email: email}, {name: name}]});
+	
+	if (!userExists) {
+		const newUser = new userModel({
+			name,
+			email,
+			password
+		});
+
+		bcrypt.hash(newUser.password, saltRounds, 
+			async function(err, hash){
+			if (err) throw err;
+			newUser.password = hash;
+			newUser.save().then(success => {
+				req.flash('success_msg','You are now registered.');
+				res.redirect('/');
+			}).catch(err => console.log(err));
+
+		});
+
+	}
+	req.body.password = password;
+	req.body.uid = email;
+
+	passport.authenticate('local', {
+        successRedirect: '/', 
+        failureRedirect: '/',
+        failureFlash: true
+    })(req, res, next);
+	
+};
+
 exports.postLogin = async function (req, res, next) {
-    let user = await userModel.findOne({email: req.body.email});
+	
     passport.authenticate('local', {
         successRedirect: '/info', 
         failureRedirect: '/',

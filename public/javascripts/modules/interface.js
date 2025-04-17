@@ -153,8 +153,8 @@ Interface.tileInfo = function (tile){
   info.style.position = "fixed";
   info.style.color = '#ece271';
   info.style.backgroundColor = "rgb(42, 41, 56)";
-  info.style.width = '130px';
-  info.style.height = '200px';
+  info.style.width = '160px';
+  info.style.height = '230px';
   info.style.bottom = 30 + 'px';
   info.style.right = 30 +'px';
   info.style.zIndex = '4';
@@ -248,7 +248,7 @@ Interface.abilities = function(event){
     let unit = JSON.parse(json);
 
     let actionBar = document.createElement('div');
-    actionBar.style.bottom = '50px';
+    actionBar.style.bottom = '70px';
     actionBar.style.left = '0';
     actionBar.style.height = '200px';
     actionBar.style.marginLeft = '10%';
@@ -263,6 +263,12 @@ Interface.abilities = function(event){
     exit.style.backgroundColor = 'red';
     exit.style.borderRadius = '20px';
     exit.style.border = '1px solid #1C336A';
+    exit.addEventListener('mouseenter', function(e){
+      exit.style.border = '1px solid #ece271';
+    });
+    exit.addEventListener('mouseleave', function(e){
+      exit.style.border = '1px solid #1C336A';
+    });
 
 
     exit.addEventListener('click', function(){
@@ -274,9 +280,9 @@ Interface.abilities = function(event){
     for(let a in unit.abilities) {
       let spellCard = document.createElement('div');
       spellCard.setAttribute('class', 'spellCard');
-      spellCard.style.height = '200px';
-      spellCard.style.width = '130px';
-      spellCard.style.left = 20 + 150 * a + 'px';
+      spellCard.style.height = '230px';
+      spellCard.style.width = '160px';
+      spellCard.style.left = 20 + 180 * a + 'px';
       spellCard.style.backgroundColor = '#2a2938';
       spellCard.style.border = '5px solid black';
       spellCard.style.outline = '2px solid #1C336A';
@@ -308,7 +314,13 @@ Interface.abilities = function(event){
       activateBtn.style.border = '1px solid #1C336A';
       activateBtn.style.marginLeft = '12px';
       activateBtn.style.marginTop = '7px';
-      activateBtn.style.opacity = '0.8';
+
+      activateBtn.addEventListener('mouseenter', function(e){
+        activateBtn.style.border = '1px solid #ece271';
+      });
+      activateBtn.addEventListener('mouseleave', function(e){
+        activateBtn.style.border = '1px solid #1C336A';
+      });
 
       activateBtn.addEventListener('click', function eventHandler(){
         //activateBtn.removeEventListener('click', eventHandler, true);

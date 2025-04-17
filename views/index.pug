@@ -4,6 +4,7 @@ block content
   .wrapper
     section
       .content
+      //-
         h1 Welcome, exile.
         p A reckless war has caused the fabric of reality to shatter.
         p Reality only exists when observed.
@@ -11,6 +12,31 @@ block content
         p Reality must be re-asserted by repairing the filaments that once bound it together.
         p This filament is called Tether.
         p Find Tether. Restore reality. Rebuild the world.
+      -//
+        h1 Welcome.
+        p This is the demo of Black Dust, a browser strategy game that I started developing as my bachelors project.
+        p This version features 1 unit class, the scout, which has two abilities.
+        p It is multiplayer which means that you will be able to encounter other players that may have tried it out.
+        p The game is built with node.js, express.js and socket.io for realtime client-server communication.
+        p //Martin
+        form#loginForm(method='post' action='/users/demologin')
+          if !user
+            p Please enter a user name.
+            input#uid(type='text' name='uid' required placeholder="Name")
+            button.button(type='submit') Submit
+            if errors != undefined && errors.length != 0
+              each error in errors
+                div.error-msg(role='alert' id='a1') #{error.msg}
+            if success_msg != ''
+              div(role='alert' id='a2') #{success_msg}
+            if error_msg != ''
+              div.error-msg(role='alert' id='a3') #{error_msg}
+            if error != ''
+              div.error-msg(role='alert' id='a4') #{error}
+          if user
+            li
+              a(href='/game') Enter the game
+
   .fade
 
 

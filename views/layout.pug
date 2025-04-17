@@ -5,7 +5,8 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(src="/javascripts/socket.io.js")
   body
-    header        
+    header
+    //-
       form#loginForm(method='post' action='/users/login')
         if !user
           p Please login or go register.
@@ -21,6 +22,7 @@ html
             div.error-msg(role='alert' id='a3') #{error_msg}
           if error != ''
             div.error-msg(role='alert' id='a4') #{error}
+          //
       nav
         ul
           if !user

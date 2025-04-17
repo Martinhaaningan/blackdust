@@ -14,7 +14,7 @@ body {
 }
 
 .newTile {
-opacity: 1
+opacity: 1;
 -webkit-animation: fade 5s;
 animation: fade 5s;
 -moz-animation: fade 5s;
@@ -51,6 +51,7 @@ display: block;
   background-color: #4E1717;
   margin: 200px 0 0 0;
   z-index: 1;
+  display: block;
 }
 
 section {
@@ -95,6 +96,7 @@ a {
   text-align: center;
   text-decoration: none;
 }
+
 .button {
   display: inline-block;
   margin: 0px 5px 0 5px;
@@ -165,7 +167,7 @@ polygon:hover {
   stroke: rgb(102,153,255, 1);
 }
 circle:hover {
-  stroke: rgb(102,153,255, 1);
+  stroke: #ece271;
 }
 
 #ui-wrapper {
@@ -186,7 +188,7 @@ circle:hover {
   padding-bottom: 5px;
   color:  #ece271;
   background-color: #4E1717;
-  width: 100px;
+  width: 130px;
   left: 0;
 }
 
@@ -232,8 +234,8 @@ button:hover {
 }
 
 form {
-    float: left;
   display: inline-block;
+  margin-bottom: 40px;
 }
 input {
   margin: 10px;

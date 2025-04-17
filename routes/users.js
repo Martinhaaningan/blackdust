@@ -13,6 +13,8 @@ router.get('/register', function (req, res, next) {
 
 router.post('/login', auth.postLogin);
 
+router.post('/demologin', auth.demoPostLogin);
+
 router.get('/logout', auth.logout);
 
 
