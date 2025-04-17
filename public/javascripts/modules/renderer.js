@@ -39,21 +39,8 @@ const drawTileAt = function(tile, size, edgeLength) {
   return points;
   //return {x: tx, y: ty, edgeLength};
 };
-
-
-
-Renderer.tiles = function (ctx, atlas, tile, board) {
-  let target = drawTileAt(tile, board, 80);
-  
-  ctx.moveTo(target.px[0], target.py[0]);
-  for (let i in target.px) {
-    ctx.lineTo(target.px[i], target.py[i]);
-  }
-  
-  ctx.fillStyle = "#a0b35a";
-  ctx.fill();
-  
-  let imageTarget = drawAt(tile, 80);
+Renderer.units = function (ctx, atlas, tile, board) {
+  let imageTarget = drawAt(tile, board, 80);
   ctx.moveTo(imageTarget.x, imageTarget.y);
   ctx.drawImage(
     atlas, //image 
@@ -66,7 +53,50 @@ Renderer.tiles = function (ctx, atlas, tile, board) {
     160,      //target width
     160       //target height
   );
+}
+
+Renderer.terrain = function (ctx, atlas, tile, board) {
+  let imageTarget = drawAt(tile, board, 80);
+  ctx.moveTo(imageTarget.x, imageTarget.y);
+  ctx.drawImage(
+    atlas, //image 
+    0, // source x
+    0,        //source y
+    160,      //source width
+    160,      //source heigh
+    imageTarget.x -80,   //target x
+    imageTarget.y - 80, //target y
+    160,      //target width
+    160       //target height
+  );
+}
+
+Renderer.tiles = function (ctx, tile, board) {
+  let target = drawTileAt(tile, board, 80);
+  
+  ctx.moveTo(target.px[0], target.py[0]);
+  for (let i in target.px) {
+    ctx.lineTo(target.px[i], target.py[i]);
+  }
+  
+  ctx.fillStyle = "#a0b35a";
+  ctx.fill();
 
 };
 
+/* Renderer.tiles = function (ctx, atlas, tile, board) {
+  let target = drawAt(tile, board, 80);
+  ctx.moveTo(target.x, target.y);
+  ctx.drawImage(
+    atlas, //image 
+    0, // source x
+    0,        //source y
+    160,      //source width
+    160,      //source heigh
+    target.x -80,   //target x
+    target.y - 80, //target y
+    160,      //target width
+    160       //target height
+  );
+*/
 export {Renderer}

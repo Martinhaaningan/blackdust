@@ -61,14 +61,23 @@ Game.renderBoard = function(){
     let tile = Game.map.tiles[i];
 
     if (tile.terrain !== null) {
-      Renderer.tiles(Game.sctx, Game.tileAtlas, tile, Game.board.size);
+      Renderer.tiles(Game.sctx, tile, Game.board.size);
+
+    }
+  }
+
+  for (let i in Game.map.tiles) {
+    let tile = Game.map.tiles[i];
+
+    if (tile.terrain !== null) {
+      Renderer.terrain(Game.sctx, Game.tileAtlas, tile, Game.board.size);
 
     }
   }
 
   for (let i in Game.map.units) {
     let unit = Game.map.units[i];
-    Renderer.tiles(Game.sctx, Game.unitAtlas, unit, Game.board.size);
+    Renderer.units(Game.sctx, Game.unitAtlas, unit, Game.board.size);
   } 
 
 }
