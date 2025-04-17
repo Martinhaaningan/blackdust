@@ -2,6 +2,16 @@ import {drawAt} from './common.js';
 
 let Renderer = {};
 
+function pos(tx, ty, px, py) {
+  // pos indicates a position inside a canvas/svg element
+  //t values are used for drawing a bitmap from an atlas
+  //p values is an array of the points of a hex used for svg or canvas drawing 
+  this.tx = tx;
+  this.ty = ty;
+  this.px = px;
+  this.py = py;
+}
+
 const drawTileAt = function(tile, size, edgeLength) {
 
   let edgeW = edgeLength * 3/2;
@@ -11,7 +21,7 @@ const drawTileAt = function(tile, size, edgeLength) {
   let centerY = size[1] /2;
     
   let tx = tile._x * edgeW + centerX;
-  let ty = (-tile._y + tile._z) * edgeH + centerY -  20;
+  let ty = (-tile._y + tile._z) * edgeH + centerY;
 
   let px = [];
   let py = [];
@@ -42,20 +52,21 @@ Renderer.tiles = function (ctx, atlas, tile, board) {
   
   ctx.fillStyle = "#a0b35a";
   ctx.fill();
-  ctx.moveTo(target.x, target.y);
-
-/*  ctx.drawImage(
+  
+  let imageTarget = drawAt(tile, 80);
+  ctx.moveTo(imageTarget.x, imageTarget.y);
+  ctx.drawImage(
     atlas, //image 
     0, // source x
     0,        //source y
     160,      //source width
     160,      //source heigh
-    target.x -80,   //target x
-    target.y - 80, //target y
+    imageTarget.x -80,   //target x
+    imageTarget.y - 80, //target y
     160,      //target width
     160       //target height
   );
-*/
+
 };
 
 export {Renderer}
