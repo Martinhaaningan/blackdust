@@ -4,7 +4,7 @@ const $ = function(foo) {
     return document.getElementById(foo);
 };
 
-const drawAt = function(tile, size) {
+ const drawAt = function(tile, size) {
     
   let edgeLength = 80;
   let edgeW = edgeLength * 3/2;
