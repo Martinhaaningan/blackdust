@@ -137,11 +137,12 @@ Interface.tileInfo = function (tile){
   p1.appendChild(coord);
 
   let p2 = document.createElement("p");
+
   let owner = document.createTextNode(tile.owner);
   p2.appendChild(owner);
 
   let p3 = document.createElement("p");
-  let terrain = document.createTextNode('terrain: ' + tile.terrain);
+  let terrain = document.createTextNode('terrain: ' + tile.terrain.key);
   p3.appendChild(terrain);
 
   info.appendChild(img);
@@ -497,8 +498,8 @@ Interface.tileSVG = function (tile, user, target) {
       hex.setAttribute('fill', "url('#green')");
       hex.setAttribute('stroke','rgb(0,255,0, 0.6)');
     } 
-
-    if (owner !== user && owner !== null) {
+    
+    if (owner !== user && owner !== "Unclaimed" && owner !== null) {
       hex.setAttribute('owner', owner);
       hex.setAttribute('fill', "url('#blue')"); 
     }

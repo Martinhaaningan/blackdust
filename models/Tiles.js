@@ -41,7 +41,7 @@ const tiles = mongoose.Schema({
 	},
 	owner: {
 		type: String,
-		default: null
+		default: "Unclaimed"
 	},
 	_x: {
 		type: Number,

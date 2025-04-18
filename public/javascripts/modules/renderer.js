@@ -60,7 +60,7 @@ Renderer.terrain = function (ctx, atlas, tile, board) {
   ctx.moveTo(imageTarget.x, imageTarget.y);
   ctx.drawImage(
     atlas, //image 
-    0, // source x
+    0 + tile.terrain.key * 160, // source x
     0,        //source y
     160,      //source width
     160,      //source heigh

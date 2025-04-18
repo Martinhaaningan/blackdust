@@ -57,7 +57,7 @@ exports.createMap = async function (Id) {
       owner: user.name,
       elevation: roll(3),
       terrain: {
-        key: 0,
+        key: roll(5),
         atlas: "tileAtlas"
       },
       resources: [],

@@ -134,7 +134,7 @@ exports.tetherFlare = async function(Id, data) {
 			_z: tile._z,
 			elevation: 1,
 			terrain: {
-				key: 0,
+				key: roll(5),
 				atlas: "tileAtlas"
 			},
 			resources: [],
