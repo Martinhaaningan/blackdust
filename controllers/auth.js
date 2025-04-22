@@ -63,38 +63,42 @@ exports.postRegister = async function (req, res, next) {
 
 exports.demoPostLogin = async function (req, res, next) {
 	let name = req.body.uid;
-	let password = name;
 	let email = name + '@' + name + '.dk';
+	req.body.uid = email;
+	req.body.password = name;
 
-	let userExists = await userModel.exists({$or: [{email: email}, {name: name}]});
-	
+	let userExists = await userModel.exists({email: email});
 	if (!userExists) {
+
+		let password = bcrypt.hashSync(name, saltRounds);	
 		const newUser = new userModel({
 			name,
 			email,
 			password
 		});
 
-		bcrypt.hash(newUser.password, saltRounds, 
-			async function(err, hash){
-			if (err) throw err;
-			newUser.password = hash;
-			newUser.save().then(success => {
-				req.flash('success_msg','You are now registered.');
-				res.redirect('/');
-			}).catch(err => console.log(err));
+		await newUser.save();
+		passport.authenticate('local', {
+			successRedirect: '/', 
+			failureRedirect: '/error',
+			failureFlash: true
+		})(req, res, next);
 
-		});
+	} else {
+
+		passport.authenticate('local', {
+			successRedirect: '/', 
+			failureRedirect: '/error',
+			failureFlash: true
+		})(req, res, next);
 
 	}
-	req.body.password = password;
-	req.body.uid = email;
 
-	passport.authenticate('local', {
-        successRedirect: '/', 
-        failureRedirect: '/',
-        failureFlash: true
-    })(req, res, next);
+
+	
+	//console.log('demopostlogin ' + req.body.uid + ':' + req.body.password);
+	//req.body = await userModel.findOne({email: email});
+	//console.log(req.body);
 	
 };
 
@@ -102,7 +106,7 @@ exports.postLogin = async function (req, res, next) {
 	
     passport.authenticate('local', {
         successRedirect: '/info', 
-        failureRedirect: '/',
+        failureRedirect: '/error',
         failureFlash: true
     })(req, res, next); 
 };

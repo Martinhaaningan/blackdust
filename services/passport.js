@@ -6,13 +6,13 @@ const bcrypt = require('bcrypt');
 // Load User model
 const User = require('../models/User');
 
-module.exports = function(passport) {
-    passport.use(
-        new LocalStrategy({
+module.exports = async function(passport) {
+    await passport.use(
+        new  LocalStrategy({
             usernameField: 'uid'
-        }, function (uid, password, done) {
+        }, async function (uid, password, done) {
         // Match user
-        User.findOne({ email: uid })
+        await User.findOne({ email: uid })
             .then(function (user) {
                 if (!user) {
                     return done(null, false, { message: 'Incorrect user or password' });
