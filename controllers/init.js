@@ -55,14 +55,18 @@ exports.createMap = async function (Id) {
       _y: grid[t]._y,
       _z: grid[t]._z,
       owner: user.name,
-      elevation: roll(3),
+      elevation: roll(4),
       terrain: {
-        key: roll(5),
-        atlas: "tileAtlas"
+        key: roll(4),
+        atlas: "ruinsAtlas"
       },
       resources: [],
       slots: []
       });
+
+      if (grid[t]._x === 0 && grid[t]._y === 0 && grid[t]._z === 0) {
+        tile.terrain.key = 4;
+    }
       await tile.save();
     }
 }

@@ -25,6 +25,7 @@ Game.resources = {tether: 1000, resource1: 0, resource2: 0, resource3: 0, resour
 
 Game.load = function () {
     return [
+        Loader.loadImage('ruins', './images/ruins.png'),
         Loader.loadImage('units', './images/units.png'),
         Loader.loadImage('tiles', './images/tiles.png'),
         Loader.loadImage('buildings', './images/buildings.png'),
@@ -70,7 +71,7 @@ Game.renderBoard = function(){
     let tile = Game.map.tiles[i];
 
     if (tile.terrain !== null) {
-      Renderer.terrain(Game.sctx, Game.tileAtlas, tile, Game.board.size);
+      Renderer.terrain(Game.sctx, Game[tile.terrain.atlas], tile, Game.board.size);
 
     }
   }
@@ -269,9 +270,10 @@ Game.run = function (sctx, actx) {
   Promise.all(p).then(
 
     function (loaded) {
+
+      Game.ruinsAtlas = Loader.getImage('ruins');
       Game.tileAtlas = Loader.getImage('tiles');
       Game.unitAtlas = Loader.getImage('units');
-
       Game.buildingsAtlas = Loader.getImage('buildings');
       Game.dust = Loader.getImage('dust');
 

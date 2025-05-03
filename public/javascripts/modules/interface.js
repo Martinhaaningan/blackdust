@@ -142,8 +142,19 @@ Interface.tileInfo = function (tile){
   p2.appendChild(owner);
 
   let p3 = document.createElement("p");
-  let terrain = document.createTextNode('terrain: ' + tile.terrain.key);
-  p3.appendChild(terrain);
+
+  if (tile.terrain === null) {
+    let terrain = document.createTextNode('terrain: ' + "Dust clouds");
+    p3.appendChild(terrain);
+
+  }
+
+  if (tile.terrain !== null) {
+    let terrain = document.createTextNode('terrain: ' + tile.terrain.atlas);
+    p3.appendChild(terrain);
+
+  }
+
 
   info.appendChild(img);
   info.appendChild(h2);
